@@ -8,6 +8,7 @@ package com.jamesashepherd.start;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -106,7 +107,7 @@ public class Starter {
 		Thread.currentThread().setContextClassLoader(cl);
 		Thread.currentThread().setName("Main");
 
-		// Listener.printClassloaders(this);
+		//printClassloaders(this);
 
 		String clazz = null;
 		try {
@@ -190,7 +191,6 @@ public class Starter {
 				if (b) {
 					try {
 						l.add(pathname.toURI().toURL());
-						System.out.println("ADDED: " + pathname);
 					} catch (final MalformedURLException e) {
 						e.printStackTrace();
 						System.exit(1);
@@ -199,7 +199,11 @@ public class Starter {
 				return b;
 			}
 		});
-
+		
+		for(URL url : l) {
+			System.out.println("ADDED: " + url);
+		}
+		
 		return l.toArray(new URL[0]);
 	}
 
@@ -232,7 +236,11 @@ public class Starter {
 				System.out.println("Searching: " + home.getAbsolutePath());
 				final File f = new File(home, needle);
 				if (f.isFile()) {
-					this.home = home;
+					try {
+						this.home = home.getCanonicalFile();
+					} catch (IOException e) {
+						System.out.println("Failed to canonicalize " + home);
+					}
 					System.setProperty(property, this.home.getAbsolutePath());
 					System.out.println(property + "=" + System.getProperty(property));
 					return;

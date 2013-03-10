@@ -398,32 +398,6 @@ public class Main {
 	}
 
 	/**
-	 * Prints ClassLoader heirarchy of <code>o</code>.
-	 * 
-	 * @param o
-	 * @since 0.5
-	 */
-	public static void printClassloaders(final Object o) {
-		System.out.println("Current ClassLoader for Class: "
-				+ o.getClass().getName());
-		ClassLoader current = o.getClass().getClassLoader();
-
-		while (current != null) {
-			System.out.println(current.getClass());
-			current = current.getParent();
-		}
-
-		System.out.println("Context ClassLoader of this Thread:");
-
-		current = Thread.currentThread().getContextClassLoader();
-
-		while (current != null) {
-			System.out.println(current.getClass());
-			current = current.getParent();
-		}
-	}
-
-	/**
 	 * Spits out help information
 	 * 
 	 * @since 0.5

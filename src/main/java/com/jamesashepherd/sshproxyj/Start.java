@@ -1,6 +1,12 @@
 //
 package com.jamesashepherd.sshproxyj;
 
+import java.io.IOException;
+
+import org.apache.sshd.SshServer;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.apache.sshd.server.shell.ProcessShellFactory;
+
 import com.jamesashepherd.start.StartException;
 import com.jamesashepherd.start.Startable;
 
@@ -13,35 +19,23 @@ import com.jamesashepherd.start.Startable;
  * @since 1.9.5
  */
 public class Start implements Startable {
-
-	class MyThread extends Thread {
-		
-		public boolean stop = false;
-		
-		@Override
-		public void run() {
-			while(true) {
-				System.out.print(".");
-				try {
-					this.sleep(1000);
-					if(this.stop)
-						break;
-				} catch (InterruptedException e) {
-					System.err.println("interrupted");
-				}
-			}
-		}
-	}
 	
-	MyThread t;
+	private SshServer sshd;
 	
 	/* (non-Javadoc)
 	 * @see com.jamesashepherd.start.Startable#startup()
 	 */
 	@Override
 	public void startup() throws StartException {
-		this.t = new MyThread();
-		t.start();
+		sshd = SshServer.setUpDefaultServer();
+		sshd.setPort(6667);
+		sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("/tmp/host.key"));
+		sshd.setShellFactory(new ProcessShellFactory(new String[] { "/bin/bash", "-i", "-l" }));
+		try {
+			sshd.start();
+		} catch (IOException e) {
+			throw new StartException("Failed to start SshServer", e);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -49,7 +43,11 @@ public class Start implements Startable {
 	 */
 	@Override
 	public void shutdown() throws StartException {
-		this.t.stop = true;
+		try {
+			sshd.stop();
+		} catch (InterruptedException e) {
+			throw new StartException("Failed to stop SshServer", e);
+		}
 	}
 }
 
