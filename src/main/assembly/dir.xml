@@ -10,7 +10,7 @@
 		<fileSet>
 			<outputDirectory>bin</outputDirectory>
 			<fileMode>0755</fileMode>
-			<directory>app/bin</directory>
+			<directory>src/main/assembly/bin</directory>
 			<filtered>true</filtered>
 		</fileSet>
 	</fileSets>
