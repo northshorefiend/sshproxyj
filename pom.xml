@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jamesashepherd.sshproxyj</groupId>
 	<artifactId>sshproxyj</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>sshproxyj</name>
 	<url>https://github.com/northshorefiend/sshproxyj</url>
@@ -14,51 +14,10 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.sshd</groupId>
-			<artifactId>sshd-core</artifactId>
-			<version>0.8.0</version>
-		</dependency>
 	</dependencies>
-	<build>
-		<resources>
-			<resource>
-				<filtering>true</filtering>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>
-								com.jamesashepherd.start.Main
-							</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/dir.xml</descriptor>
-					</descriptors>
-				</configuration>
-				<executions>
-					<execution>
-						<id>dir-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+	<modules>
+		<module>sshproxyj-start</module>
+		<module>sshproxyj-core</module>
+		<module>assembly</module>
+	</modules>
 </project>

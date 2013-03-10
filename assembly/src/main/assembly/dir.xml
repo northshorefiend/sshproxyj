@@ -6,6 +6,11 @@
 	<formats>
 		<format>dir</format>
 	</formats>
+	<moduleSets>
+		<moduleSet>
+			<useAllReactorProjects>true</useAllReactorProjects>
+		</moduleSet>
+	</moduleSets>
 	<fileSets>
 		<fileSet>
 			<outputDirectory>bin</outputDirectory>
