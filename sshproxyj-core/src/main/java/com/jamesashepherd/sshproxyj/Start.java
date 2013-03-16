@@ -1,30 +1,40 @@
 //
 package com.jamesashepherd.sshproxyj;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.Arrays;
-import java.io.FileInputStream;
-
-import org.apache.mina.util.Base64;
-import org.apache.sshd.SshServer;
-import org.apache.sshd.client.auth.UserAuthPublicKey;
-import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.server.PasswordAuthenticator;
-import org.apache.sshd.server.PublickeyAuthenticator;
-import org.apache.sshd.server.UserAuth;
-import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.session.ServerSession;
-import org.apache.sshd.server.shell.ProcessShellFactory;
-import org.codehaus.plexus.util.IOUtil;
+import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+
+import org.apache.mina.util.Base64;
+import org.apache.sshd.ClientChannel;
+import org.apache.sshd.ClientSession;
+import org.apache.sshd.SshClient;
+import org.apache.sshd.SshServer;
+import org.apache.sshd.client.future.OpenFuture;
+import org.apache.sshd.common.Factory;
+import org.apache.sshd.common.future.SshFutureListener;
+import org.apache.sshd.server.Command;
+import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.PublickeyAuthenticator;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.apache.sshd.server.session.ServerSession;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMReader;
+import org.codehaus.plexus.util.IOUtil;
 
 import com.jamesashepherd.start.StartException;
 import com.jamesashepherd.start.Startable;
@@ -41,25 +51,123 @@ public class Start implements Startable {
 
 	private SshServer sshd;
 
+	private SshClient client;
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.jamesashepherd.start.Startable#startup()
 	 */
 	public void startup() throws StartException {
+
+		// set up client
+		client = SshClient.setUpDefaultClient();
+		PublicKey publicKey = null;
+		KeyPair kp = null;
+		try {
+			InputStream is = new FileInputStream(new File("/tmp/id_rsa.pub"));
+			publicKey = decodePublicKey(IOUtil.toString(is));
+
+			BufferedReader br = new BufferedReader(
+					new FileReader("/tmp/id_rsa"));
+			Security.addProvider(new BouncyCastleProvider());
+			PEMReader pr = new PEMReader(br);
+			kp = (KeyPair) pr.readObject();
+			pr.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		final KeyPair keyPair = new KeyPair(publicKey, kp.getPrivate());
+
+		client.start();
+
+		// set up server
 		sshd = SshServer.setUpDefaultServer();
 		sshd.setPort(6667);
 		sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(
 				"/tmp/host.key"));
-		sshd.setShellFactory(new ProcessShellFactory(new String[] {
-				"/bin/bash", "-i", "-l" }));
-		// sshd.setPasswordAuthenticator(new PasswordAuthenticator() {
-		//
-		// public boolean authenticate(String username, String password,
-		// ServerSession session) {
-		// return username.equals("jas") && password.equals("mega");
-		// }
-		// });
+		// sshd.setShellFactory(new ProcessShellFactory(new String[] {
+		// "/bin/bash", "-i", "-l" }));
+		sshd.setShellFactory(new Factory<Command>() {
+
+			ExitCallback exitCallBack;
+
+			public Command create() {
+				try {
+					final ClientSession session = client
+							.connect("localhost", 22).await().getSession();
+					System.out.println("Started Client Session");
+					session.authPublicKey("jas", keyPair);
+
+					int ret = session.waitFor(ClientSession.CLOSED
+							| ClientSession.AUTHED, 10 * 1000); // milliseconds
+					System.out.println("Waited for auth: " + ret);
+					if ((ret & ClientSession.CLOSED) != 0) {
+						System.err.println("error session closed");
+						System.exit(-1);
+					}
+
+					System.out.println("Still open");
+
+					final ClientChannel channel = session
+							.createChannel("shell");
+					System.out.println("Returning Command");
+
+					return new Command() {
+
+						public void setInputStream(InputStream in) {
+							channel.setIn(in);
+						}
+
+						public void setOutputStream(OutputStream out) {
+							channel.setOut(out);
+						}
+
+						public void setErrorStream(OutputStream err) {
+							channel.setErr(err);
+						}
+
+						public void setExitCallback(ExitCallback callback) {
+							exitCallBack = callback;
+						}
+
+						public void start(Environment env) throws IOException {
+							try {
+								OpenFuture of = channel.open();
+								of.addListener(new SshFutureListener<OpenFuture>() {
+									public void operationComplete(
+											OpenFuture future) {
+										exitCallBack.onExit(channel
+												.getExitStatus());
+									}
+								});
+							} catch (Exception e) {
+								throw new IOException(e);
+							}
+						}
+
+						public void destroy() {
+							try {
+								// channel.waitFor(ClientChannel.CLOSED, 0);
+								session.close(true);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+
+					};
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+		});
 
 		sshd.setPublickeyAuthenticator(new PublickeyAuthenticator() {
 
@@ -67,7 +175,8 @@ public class Start implements Startable {
 					ServerSession session) {
 				PublicKey publicKey;
 				try {
-					InputStream is = new FileInputStream(new File("/tmp/id_rsa.pub"));
+					InputStream is = new FileInputStream(new File(
+							"/tmp/id_rsa.pub"));
 					publicKey = decodePublicKey(IOUtil.toString(is));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -96,6 +205,7 @@ public class Start implements Startable {
 	 */
 	public void shutdown() throws StartException {
 		try {
+			client.stop();
 			sshd.stop();
 		} catch (InterruptedException e) {
 			throw new StartException("Failed to stop SshServer", e);
