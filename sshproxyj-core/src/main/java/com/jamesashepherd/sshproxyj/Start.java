@@ -17,6 +17,8 @@ import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.mina.util.Base64;
 import org.apache.sshd.ClientChannel;
@@ -60,6 +62,8 @@ public class Start implements Startable {
 	 */
 	public void startup() throws StartException {
 
+		clientSessions = new LinkedList<ClientSession>();
+		
 		// set up client
 		client = SshClient.setUpDefaultClient();
 		PublicKey publicKey = null;
@@ -100,6 +104,7 @@ public class Start implements Startable {
 				try {
 					final ClientSession session = client
 							.connect("localhost", 22).await().getSession();
+					clientSessions.add(session);
 					System.out.println("Started Client Session");
 					session.authPublicKey("jas", keyPair);
 
@@ -137,14 +142,16 @@ public class Start implements Startable {
 
 						public void start(Environment env) throws IOException {
 							try {
-								OpenFuture of = channel.open();
-								of.addListener(new SshFutureListener<OpenFuture>() {
-									public void operationComplete(
-											OpenFuture future) {
-										exitCallBack.onExit(channel
-												.getExitStatus());
+								channel.open();
+								new Thread(new Runnable() {
+
+									public void run() {
+										channel.waitFor(ClientChannel.CLOSED, 0);
+										exitCallBack.onExit(channel.getExitStatus() == null ? 1 : channel.getExitStatus());
+										session.close(false);
 									}
-								});
+									
+								}).start();
 							} catch (Exception e) {
 								throw new IOException(e);
 							}
@@ -152,7 +159,6 @@ public class Start implements Startable {
 
 						public void destroy() {
 							try {
-								// channel.waitFor(ClientChannel.CLOSED, 0);
 								session.close(true);
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -205,6 +211,9 @@ public class Start implements Startable {
 	 */
 	public void shutdown() throws StartException {
 		try {
+			for(ClientSession session : clientSessions) {
+				session.close(false);
+			}
 			client.stop();
 			sshd.stop();
 		} catch (InterruptedException e) {
@@ -212,6 +221,8 @@ public class Start implements Startable {
 		}
 	}
 
+	private List<ClientSession> clientSessions;
+	
 	private byte[] bytes;
 
 	private int pos;
