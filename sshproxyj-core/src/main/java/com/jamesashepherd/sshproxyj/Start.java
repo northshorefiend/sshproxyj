@@ -25,9 +25,7 @@ import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.SshServer;
-import org.apache.sshd.client.future.OpenFuture;
 import org.apache.sshd.common.Factory;
-import org.apache.sshd.common.future.SshFutureListener;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -227,6 +225,13 @@ public class Start implements Startable {
 
 	private int pos;
 
+	/**
+	 * http://maven.apache.org/wagon/xref/org/apache/maven/wagon/providers/ssh/TestPublickeyAuthenticator.html
+	 * @since 1.9.5
+	 * @param keyLine
+	 * @return
+	 * @throws Exception
+	 */
 	public PublicKey decodePublicKey(String keyLine) throws Exception {
 		bytes = null;
 		pos = 0;
