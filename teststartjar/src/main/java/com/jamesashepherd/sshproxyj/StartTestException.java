@@ -1,4 +1,4 @@
-package com.jamesashepherd.sshproxyj.starttest;
+package com.jamesashepherd.sshproxyj;
 
 import com.jamesashepherd.start.StartException;
 

@@ -1,19 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-  <classpathentry kind="src" path="src/main/java"/>
-  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
-  <classpathentry kind="src" path="src/test/java" output="target/test-classes"/>
+  <classpathentry kind="src" path="src/test/java" output="target/test-classes" including="**/*.java"/>
   <classpathentry kind="src" path="src/test/resources" output="target/test-classes" excluding="**/*.java"/>
+  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
+  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
   <classpathentry kind="output" path="target/classes"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="var" path="M2_REPO/org/apache/sshd/sshd-core/0.8.0/sshd-core-0.8.0.jar" sourcepath="M2_REPO/org/apache/sshd/sshd-core/0.8.0/sshd-core-0.8.0-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/apache/sshd/sshd-core/0.8.0/sshd-core-0.8.0-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/apache/mina/mina-core/2.0.5/mina-core-2.0.5.jar" sourcepath="M2_REPO/org/apache/mina/mina-core/2.0.5/mina-core-2.0.5-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/apache/mina/mina-core/2.0.5/mina-core-2.0.5-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar" sourcepath="M2_REPO/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
   <classpathentry kind="src" path="/sshproxyj-start"/>
+  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-simple/1.7.2/slf4j-simple-1.7.2.jar" sourcepath="M2_REPO/org/slf4j/slf4j-simple/1.7.2/slf4j-simple-1.7.2-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/slf4j/slf4j-simple/1.7.2/slf4j-simple-1.7.2-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/codehaus/plexus/plexus-io/2.0.6/plexus-io-2.0.6.jar" sourcepath="M2_REPO/org/codehaus/plexus/plexus-io/2.0.6/plexus-io-2.0.6-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/codehaus/plexus/plexus-io/2.0.6/plexus-io-2.0.6-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/codehaus/plexus/plexus-utils/3.0.8/plexus-utils-3.0.8.jar" sourcepath="M2_REPO/org/codehaus/plexus/plexus-utils/3.0.8/plexus-utils-3.0.8-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/codehaus/plexus/plexus-utils/3.0.8/plexus-utils-3.0.8-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bctsp-jdk16/1.46/bctsp-jdk16-1.46.jar" sourcepath="M2_REPO/org/bouncycastle/bctsp-jdk16/1.46/bctsp-jdk16-1.46-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/bouncycastle/bctsp-jdk16/1.46/bctsp-jdk16-1.46-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46.jar" sourcepath="M2_REPO/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcmail-jdk16/1.46/bcmail-jdk16-1.46.jar" sourcepath="M2_REPO/org/bouncycastle/bcmail-jdk16/1.46/bcmail-jdk16-1.46-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/jas/.m2/repository/org/bouncycastle/bcmail-jdk16/1.46/bcmail-jdk16-1.46-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
   <classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar" sourcepath="M2_REPO/junit/junit/3.8.1/junit-3.8.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/apache/sshd/sshd-core/0.8.0/sshd-core-0.8.0.jar" sourcepath="M2_REPO/org/apache/sshd/sshd-core/0.8.0/sshd-core-0.8.0-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/apache/mina/mina-core/2.0.5/mina-core-2.0.5.jar" sourcepath="M2_REPO/org/apache/mina/mina-core/2.0.5/mina-core-2.0.5-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar" sourcepath="M2_REPO/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bctsp-jdk16/1.46/bctsp-jdk16-1.46.jar" sourcepath="M2_REPO/org/bouncycastle/bctsp-jdk16/1.46/bctsp-jdk16-1.46-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46.jar" sourcepath="M2_REPO/org/bouncycastle/bcprov-jdk16/1.46/bcprov-jdk16-1.46-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/bouncycastle/bcmail-jdk16/1.46/bcmail-jdk16-1.46.jar" sourcepath="M2_REPO/org/bouncycastle/bcmail-jdk16/1.46/bcmail-jdk16-1.46-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/codehaus/plexus/plexus-io/2.0.6/plexus-io-2.0.6.jar" sourcepath="M2_REPO/org/codehaus/plexus/plexus-io/2.0.6/plexus-io-2.0.6-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/codehaus/plexus/plexus-utils/3.0.8/plexus-utils-3.0.8.jar" sourcepath="M2_REPO/org/codehaus/plexus/plexus-utils/3.0.8/plexus-utils-3.0.8-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-simple/1.7.2/slf4j-simple-1.7.2.jar" sourcepath="M2_REPO/org/slf4j/slf4j-simple/1.7.2/slf4j-simple-1.7.2-sources.jar"/>
 </classpath>

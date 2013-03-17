@@ -1,8 +1,9 @@
-package com.jamesashepherd.sshproxyj.starttest;
+package com.jamesashepherd.sshproxyj;
 
 import org.junit.Test;
 
-import com.jamesashepherd.sshproxyj.starttest.Start;
+import com.jamesashepherd.sshproxyj.Start;
+import com.jamesashepherd.sshproxyj.StartTestException;
 import com.jamesashepherd.start.StartException;
 
 /**

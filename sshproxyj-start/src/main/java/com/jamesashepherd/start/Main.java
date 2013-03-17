@@ -26,9 +26,8 @@ import java.util.Properties;
  * <p>
  * Allows us to do everything in Java that is needed to run a Java application
  * as a daemon or service. This class is the <code>Main-Class</code> for the
- * <code>.jar</code>, by default it sets up an
- * {@link Listener} to listen for admin commands over a socket, and continues to
- * start up the application.
+ * <code>.jar</code>, by default it sets up an {@link Listener} to listen for
+ * admin commands over a socket, and continues to start up the application.
  * </p>
  * 
  * 
@@ -141,16 +140,22 @@ public class Main {
 		// are we asked for help?
 		if (command.equals(Main.PREFIX + Commands.valueOf("help"))) {
 			Main.outputHelp();
-			System.exit(1);
 		} else if (command.equals(Main.PREFIX + Commands.valueOf("runonly"))) {
 			// run application
-			Main.runonly(file);
+			try {
+				Main.runonly(file);
+			} catch (StartException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 		} else {
 
 			// if not asked for help or runonly then we need port and code
-			final int startport = Integer.getInteger(Main.PORT_PROPERTY_KEY, 0).intValue();
+			final int startport = Integer.getInteger(Main.PORT_PROPERTY_KEY, 0)
+					.intValue();
 
-			final String startcode = System.getProperty(Main.CODE_PROPERTY_KEY, null);
+			final String startcode = System.getProperty(Main.CODE_PROPERTY_KEY,
+					null);
 
 			// are we asked to shutdown?
 			if (command.equals(Main.PREFIX + Commands.valueOf("shutdown"))) {
@@ -177,7 +182,8 @@ public class Main {
 				// stop application
 				Main.shutdown(startport, startcode);
 
-			} else if (command.equals(Main.PREFIX + Commands.valueOf("startup"))) {
+			} else if (command
+					.equals(Main.PREFIX + Commands.valueOf("startup"))) {
 				// we are asked to start the application
 
 				// need a valid port
@@ -190,16 +196,16 @@ public class Main {
 				}
 
 				// see if we need to output start code to a file
-				final String scf = System.getProperty(Main.CODEFILE_PROPERTY_KEY);
+				final String scf = System
+						.getProperty(Main.CODEFILE_PROPERTY_KEY);
 				File startcodefile = null;
-				if(scf != null) {
+				if (scf != null) {
 					startcodefile = new File(scf);
 				}
 				// start application
 				Main.startup(startport, startcode, file, startcodefile);
 			} else {
 				Main.outputHelp();
-				System.exit(1);
 			}
 		}
 	}
@@ -207,9 +213,11 @@ public class Main {
 	/**
 	 * Run application without listener on a port
 	 * 
+	 * @throws StartException
+	 * 
 	 * @since 0.5
 	 */
-	private static void runonly(final String file) {
+	private static void runonly(final String file) throws StartException {
 
 		// load properties
 		final Properties prop = Main.loadProperties(file);
@@ -219,7 +227,6 @@ public class Main {
 		final Listener l = new Listener(s.getStartable());
 		l.start();
 		s.startup();
-
 	}
 
 	/**
@@ -228,8 +235,8 @@ public class Main {
 	 * </p>
 	 * 
 	 * <p>
-	 * Note that <code>file</code> only needs to list the properties you want
-	 * to override.
+	 * Note that <code>file</code> only needs to list the properties you want to
+	 * override.
 	 * </p>
 	 * 
 	 * @param startport
@@ -242,8 +249,8 @@ public class Main {
 	 *            where to output the start code, if not null
 	 * @since 0.5
 	 */
-	private static void startup(final int startport, final String startcode, final String file,
-			final File startcodefile) {
+	private static void startup(final int startport, final String startcode,
+			final String file, final File startcodefile) {
 
 		// load properties
 		final Properties prop = Main.loadProperties(file);
@@ -252,8 +259,8 @@ public class Main {
 		final Starter s = new Starter(prop);
 
 		try {
-			final Listener l = new Listener(s.getStartable(), startport, startcode,
-					startcodefile);
+			final Listener l = new Listener(s.getStartable(), startport,
+					startcode, startcodefile);
 			l.start();
 		} catch (final UnknownHostException e) {
 			System.err
@@ -267,7 +274,12 @@ public class Main {
 			System.exit(1);
 		}
 
-		s.startup();
+		try {
+			s.startup();
+		} catch (StartException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	/**
@@ -355,8 +367,8 @@ public class Main {
 		try {
 			socket = new Socket("127.0.0.1", startport);
 			out = new PrintWriter(socket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(socket
-					.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(
+					socket.getInputStream()));
 			out.println(startcode);
 			out.println("shutdown");
 			String rcvd;
@@ -403,8 +415,9 @@ public class Main {
 	 * @since 0.5
 	 */
 	private static void outputHelp() {
-		System.out
-				.println("usage: java [-D" + Main.PORT_PROPERTY_KEY + "=p] [-D" + Main.CODE_PROPERTY_KEY + "=c] [-D" + Main.CODEFILE_PROPERTY_KEY + "=f] -jar X.jar [OPTIONS]");
+		System.out.println("usage: java [-D" + Main.PORT_PROPERTY_KEY
+				+ "=p] [-D" + Main.CODE_PROPERTY_KEY + "=c] [-D"
+				+ Main.CODEFILE_PROPERTY_KEY + "=f] -jar X.jar [OPTIONS]");
 		System.out.println();
 		System.out.println("OPTIONS:");
 		System.out.println();

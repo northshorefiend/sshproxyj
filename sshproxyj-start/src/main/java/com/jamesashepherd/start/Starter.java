@@ -260,18 +260,15 @@ public class Starter {
 
 	/**
 	 * Invokes the application, by calling {@link #startable}.startup().
+	 * @throws StartException 
 	 * 
 	 * @since 0.5
 	 */
-	public void startup() {
+	public void startup() throws StartException {
 
 		System.out.println(homeEnv + "=" + home);
 
-		try {
-			startable.startup();
-		} catch (StartException e) {
-			e.printStackTrace();
-		}
+		startable.startup();
 
 	}
 
