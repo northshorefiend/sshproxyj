@@ -1,9 +1,11 @@
 package com.jamesashepherd.sshproxyj;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
-import com.jamesashepherd.sshproxyj.Start;
-import com.jamesashepherd.sshproxyj.StartTestException;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.StandardOutputStreamLog;
+
 import com.jamesashepherd.start.StartException;
 
 /**
@@ -11,9 +13,13 @@ import com.jamesashepherd.start.StartException;
  */
 public class StartTest {
 	
-	@Test(expected=StartTestException.class)
-	public void throwsException() throws StartException {
+	@Rule
+	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
+	
+	@Test
+	public void runs() throws StartException {
 		Start s = new Start();
 		s.startup();
+		assertEquals("123456789 Started qwertyuiop\n", log.getLog());
 	}
 }

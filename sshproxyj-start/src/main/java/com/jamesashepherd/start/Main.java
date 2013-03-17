@@ -129,85 +129,76 @@ public class Main {
 	 * @since 0.5
 	 */
 	public static void main(final String[] args) {
+		try {
+			// command
+			final String command = (args.length < 1) ? Main.PREFIX
+					+ Commands.values()[0].toString() : args[0];
 
-		// command
-		final String command = (args.length < 1) ? Main.PREFIX
-				+ Commands.values()[0].toString() : args[0];
+			// start.properties (note is second parameter)
+			final String file = (args.length > 1) ? args[1] : null;
 
-		// start.properties (note is second parameter)
-		final String file = (args.length > 1) ? args[1] : null;
-
-		// are we asked for help?
-		if (command.equals(Main.PREFIX + Commands.valueOf("help"))) {
-			Main.outputHelp();
-		} else if (command.equals(Main.PREFIX + Commands.valueOf("runonly"))) {
-			// run application
-			try {
-				Main.runonly(file);
-			} catch (StartException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		} else {
-
-			// if not asked for help or runonly then we need port and code
-			final int startport = Integer.getInteger(Main.PORT_PROPERTY_KEY, 0)
-					.intValue();
-
-			final String startcode = System.getProperty(Main.CODE_PROPERTY_KEY,
-					null);
-
-			// are we asked to shutdown?
-			if (command.equals(Main.PREFIX + Commands.valueOf("shutdown"))) {
-
-				// need valid port
-				if (startport <= 0 || startport > 65535) {
-					System.err.println();
-					System.err.println("ERROR: Need a valid port to contact");
-					System.err.println();
-					Main.outputHelp();
-					System.exit(1);
-				}
-
-				// need valid code
-				if (startcode == null) {
-					System.err.println();
-					System.err
-							.println("ERROR: Need a code to contact port with");
-					System.err.println();
-					Main.outputHelp();
-					System.exit(1);
-				}
-
-				// stop application
-				Main.shutdown(startport, startcode);
-
+			// are we asked for help?
+			if (command.equals(Main.PREFIX + Commands.valueOf("help"))) {
+				Main.outputHelp(0);
 			} else if (command
-					.equals(Main.PREFIX + Commands.valueOf("startup"))) {
-				// we are asked to start the application
-
-				// need a valid port
-				if (startport < 0 || startport > 65535) {
-					System.err.println();
-					System.err.println("ERROR: Need a valid port to listen on");
-					System.err.println();
-					Main.outputHelp();
-					System.exit(1);
-				}
-
-				// see if we need to output start code to a file
-				final String scf = System
-						.getProperty(Main.CODEFILE_PROPERTY_KEY);
-				File startcodefile = null;
-				if (scf != null) {
-					startcodefile = new File(scf);
-				}
-				// start application
-				Main.startup(startport, startcode, file, startcodefile);
+					.equals(Main.PREFIX + Commands.valueOf("runonly"))) {
+				Main.runonly(file);
 			} else {
-				Main.outputHelp();
+				// if not asked for help or runonly then we need port and code
+				final int startport = Integer.getInteger(
+						Main.PORT_PROPERTY_KEY, 0).intValue();
+
+				String startcode = getStartCode();
+				
+				// need a valid port
+				if (!isValidPort(startport)) {
+					System.err.println("ERROR: Need a valid port to listen on");
+					Main.outputHelp(1);
+				}
+
+				if (command.equals(Main.PREFIX + Commands.valueOf("shutdown"))) {
+
+					if (startcode == null) {
+						System.err
+								.println("ERROR: Need a code to contact port with");
+						Main.outputHelp(1);
+					}
+
+					Main.shutdown(startport, startcode);
+				} else if (command.equals(Main.PREFIX
+						+ Commands.valueOf("startup"))) {
+
+					// see if we need to output start code to a file
+					final String scf = System
+							.getProperty(Main.CODEFILE_PROPERTY_KEY);
+					File startcodefile = null;
+					if (scf != null) {
+						startcodefile = new File(scf);
+					}
+
+					// start application
+					Main.startup(startport, startcode, file, startcodefile);
+				} else {
+					Main.outputHelp(1);
+				}
 			}
+		} catch (StartException e) {
+			e.printStackTrace();
+			Main.outputHelp(1);
 		}
+	}
+
+	private static String getStartCode() {
+		String startcode = System.getProperty(
+				Main.CODE_PROPERTY_KEY, null);
+
+		if(startcode != null && startcode.length() == 0)
+			startcode = null;
+		return startcode;
+	}
+
+	protected static boolean isValidPort(int port) {
+		return port > 0 && port <= 65535;
 	}
 
 	/**
@@ -223,9 +214,10 @@ public class Main {
 		final Properties prop = Main.loadProperties(file);
 
 		// OK, now we are ready to start the listener and invoke the application
+		// listener just starts a shutdown hook.
 		final Starter s = new Starter(prop);
-		final Listener l = new Listener(s.getStartable());
-		l.start();
+		Listener l = new Listener(s.getStartable());
+		l.run();
 		s.startup();
 	}
 
@@ -414,7 +406,7 @@ public class Main {
 	 * 
 	 * @since 0.5
 	 */
-	private static void outputHelp() {
+	private static void outputHelp(int exitcode) {
 		System.out.println("usage: java [-D" + Main.PORT_PROPERTY_KEY
 				+ "=p] [-D" + Main.CODE_PROPERTY_KEY + "=c] [-D"
 				+ Main.CODEFILE_PROPERTY_KEY + "=f] -jar X.jar [OPTIONS]");
@@ -447,5 +439,6 @@ public class Main {
 				.println("                                              contacting on 127.0.0.1 on port p,");
 		System.out
 				.println("                                              with auth code c.");
+		System.exit(exitcode);
 	}
 }

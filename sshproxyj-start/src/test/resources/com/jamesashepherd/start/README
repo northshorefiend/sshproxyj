@@ -1,0 +1,4 @@
+This jar has to be manually copied from the teststartjar/targetdir
+whenever you update the code in the teststartjar module.
+I don't know how to get it programatically, and also, there is
+a dependency cycle.

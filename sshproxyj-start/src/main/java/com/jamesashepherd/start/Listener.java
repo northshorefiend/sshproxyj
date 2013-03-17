@@ -17,8 +17,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Random;
-
+import java.util.UUID;
 
 /**
  * <p>
@@ -94,14 +93,15 @@ public class Listener extends Thread {
 	 *             if can't open socket
 	 * @since 0.5
 	 */
-	public Listener(final Startable startable, final int startport, String startcode,
-			final File startcodefile) throws UnknownHostException, IOException {
+	public Listener(final Startable startable, final int startport,
+			String startcode, final File startcodefile)
+			throws UnknownHostException, IOException {
 
 		this(startable);
 		listenOnPort = true;
 
-		socket = new ServerSocket(startport, 1, InetAddress
-				.getByName("127.0.0.1"));
+		socket = new ServerSocket(startport, 1,
+				InetAddress.getByName("127.0.0.1"));
 
 		if (startport == 0) {
 			System.out.println("Will listen on 127.0.0.1:"
@@ -109,8 +109,7 @@ public class Listener extends Thread {
 		}
 
 		if (startcode == null) {
-			startcode = Long.toString((new Random()).nextLong()
-					- System.currentTimeMillis());
+			startcode = UUID.randomUUID().toString();
 			System.out.println("Will listen for code: '" + startcode + "'");
 		}
 
@@ -203,8 +202,8 @@ public class Listener extends Thread {
 				clientSocket = socket.accept();
 
 				out = new PrintWriter(clientSocket.getOutputStream(), true);
-				in = new BufferedReader(new InputStreamReader(clientSocket
-						.getInputStream()));
+				in = new BufferedReader(new InputStreamReader(
+						clientSocket.getInputStream()));
 
 				// read code
 				String inputLine = in.readLine();
@@ -224,7 +223,6 @@ public class Listener extends Thread {
 				}
 				in.close();
 			} catch (final IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				if (out != null) {
@@ -259,7 +257,7 @@ public class Listener extends Thread {
 			} catch (StartException e) {
 				e.printStackTrace();
 			}
-			
+
 			// delete codefile
 			if (codefile != null) {
 				if (codefile.delete()) {
