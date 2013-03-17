@@ -1,17 +1,26 @@
+/**
+ * Copyright 2013 James A. Shepherd
+ * http://www.JamesAshepherd.com/
+ *
+ * LICENCE: http://www.gnu.org/licenses/lgpl.html
+ */
 package com.jamesashepherd.sshproxyj;
 
 import com.jamesashepherd.start.StartException;
 import com.jamesashepherd.start.Startable;
 
-public class Start implements Startable
-{
+/**
+ * @author James A. Shepherd
+ * @since 1.0
+ */
+public class Start implements Startable {
 	private boolean shutdown = false;
-	
+
 	public void startup() throws StartException {
 		System.out.println("123456789 Started qwertyuiop");
-		
-		if("1".equals(System.getProperty("teststart.run"))) {
-			while(!getShutdown()) {
+
+		if ("1".equals(System.getProperty("teststart.run"))) {
+			while (!getShutdown()) {
 				try {
 					System.err.print(".");
 					Thread.currentThread().sleep(1000);
@@ -21,13 +30,13 @@ public class Start implements Startable
 			}
 			System.err.println();
 		}
-		
+
 	}
 
 	synchronized private boolean getShutdown() {
 		return shutdown;
 	}
-	
+
 	synchronized public void shutdown() throws StartException {
 		shutdown = true;
 	}

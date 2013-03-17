@@ -1,5 +1,5 @@
 /**
- * Copyright 2007 James A. Shepherd
+ * Copyright 2013 James A. Shepherd
  * http://www.JamesAshepherd.com/
  *
  * LICENCE: http://www.gnu.org/licenses/lgpl.html
@@ -24,8 +24,7 @@ import java.util.Properties;
  * </p>
  * 
  * @author James A. Shepherd
- * @version $Id: Starter.java 382 2008-06-23 14:27:54Z jas $
- * @since 0.5
+ * @since 1.0
  * 
  */
 public class Starter {
@@ -97,7 +96,7 @@ public class Starter {
 	 * 
 	 * @param prop
 	 *            start.properties
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public Starter(final Properties prop) {
 
@@ -174,7 +173,7 @@ public class Starter {
 	 * Read in classpath jars
 	 * 
 	 * @return URLs of jars to put on the classpath
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private URL[] getJars() {
 
@@ -211,7 +210,7 @@ public class Starter {
 	 * Works out where home dir for this application is. First from system
 	 * property, then environment variable, then searching.
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private void setHome() {
 
@@ -262,7 +261,7 @@ public class Starter {
 	 * Invokes the application, by calling {@link #startable}.startup().
 	 * @throws StartException 
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public void startup() throws StartException {
 
@@ -276,7 +275,7 @@ public class Starter {
 	 * Prints ClassLoader heirarchy of <code>o</code>.
 	 * 
 	 * @param o
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public static void printClassloaders(final Object o) {
 		System.out.println("Current ClassLoader for Class: "
@@ -301,7 +300,7 @@ public class Starter {
 	/**
 	 * 
 	 * @return {@link Startable} object we are concerned with.
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public Startable getStartable() {
 		return startable;

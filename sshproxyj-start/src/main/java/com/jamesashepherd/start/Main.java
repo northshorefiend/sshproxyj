@@ -1,5 +1,5 @@
 /**
- * Copyright 2007 James A. Shepherd
+ * Copyright 2013 James A. Shepherd
  * http://www.JamesAshepherd.com/
  *
  * LICENCE: http://www.gnu.org/licenses/lgpl.html
@@ -32,8 +32,7 @@ import java.util.Properties;
  * 
  * 
  * @author James A. Shepherd
- * @version $Id: Main.java 131 2007-06-08 14:15:24Z jas $
- * @since 0.5
+ * @since 1.0
  * 
  */
 public class Main {
@@ -62,8 +61,7 @@ public class Main {
 	 * Possible commands, the first one is the default.
 	 * 
 	 * @author James A. Shepherd
-	 * @version $Id: Main.java 131 2007-06-08 14:15:24Z jas $
-	 * @since 0.5
+	 * @since 1.0
 	 * 
 	 */
 	public static enum Commands {
@@ -126,7 +124,7 @@ public class Main {
 	 * 
 	 * @param args
 	 *            commandline arguments
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public static void main(final String[] args) {
 		try {
@@ -206,7 +204,7 @@ public class Main {
 	 * 
 	 * @throws StartException
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private static void runonly(final String file) throws StartException {
 
@@ -239,7 +237,7 @@ public class Main {
 	 *            properties file to override defaults, may be null
 	 * @param startcodefile
 	 *            where to output the start code, if not null
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private static void startup(final int startport, final String startcode,
 			final String file, final File startcodefile) {
@@ -277,9 +275,9 @@ public class Main {
 	/**
 	 * Does boilerplate loading of Properties.
 	 * 
-	 * @param propFile
+	 * @param file
 	 * @return Properties
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private static Properties loadProperties(final String file) {
 
@@ -349,7 +347,7 @@ public class Main {
 	 *            port to contact
 	 * @param startcode
 	 *            code to use
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private static void shutdown(final int startport, final String startcode) {
 		Socket socket = null;
@@ -404,7 +402,7 @@ public class Main {
 	/**
 	 * Spits out help information
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private static void outputHelp(int exitcode) {
 		System.out.println("usage: java [-D" + Main.PORT_PROPERTY_KEY

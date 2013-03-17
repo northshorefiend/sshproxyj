@@ -1,5 +1,5 @@
 /**
- * Copyright 2007 James A. Shepherd
+ * Copyright 2013 James A. Shepherd
  * http://www.JamesAshepherd.com/
  *
  * LICENCE: http://www.gnu.org/licenses/lgpl.html
@@ -29,8 +29,7 @@ import java.util.UUID;
  * </p>
  * 
  * @author James A. Shepherd
- * @version $Id: Listener.java 137 2007-06-11 14:53:58Z jas $
- * @since 0.5
+ * @since 1.0
  * 
  */
 public class Listener extends Thread {
@@ -91,7 +90,7 @@ public class Listener extends Thread {
 	 *             if can't open socket
 	 * @throws UnknownHostException
 	 *             if can't open socket
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public Listener(final Startable startable, final int startport,
 			String startcode, final File startcodefile)
@@ -153,7 +152,7 @@ public class Listener extends Thread {
 	 * 
 	 * @param startable
 	 *            application to start
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	public Listener(final Startable startable) {
 		super("start Listener");
@@ -174,7 +173,7 @@ public class Listener extends Thread {
 	 * Starts up the listener and invokes the application.
 	 * 
 	 * @see java.lang.Thread#run()
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	@Override
 	public void run() {
@@ -189,7 +188,7 @@ public class Listener extends Thread {
 	/**
 	 * Listen for commands.
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private void listen() {
 		System.out.println("Listening...");
@@ -241,7 +240,7 @@ public class Listener extends Thread {
 	/**
 	 * Does the actual shutting down.
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	private synchronized void shutdown() {
 

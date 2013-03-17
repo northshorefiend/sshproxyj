@@ -2,6 +2,9 @@
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!-- Copyright 2013 James A. Shepherd -->
+	<!-- http://www.JamesAshepherd.com/ -->
+	<!-- LICENCE: http://www.gnu.org/licenses/lgpl.html -->
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.jamesashepherd.sshproxyj</groupId>

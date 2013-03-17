@@ -1,4 +1,9 @@
-//
+/**
+ * Copyright 2013 James A. Shepherd
+ * http://www.JamesAshepherd.com/
+ *
+ * LICENCE: http://www.gnu.org/licenses/lgpl.html
+ */
 package com.jamesashepherd.sshproxyj;
 
 import java.io.BufferedReader;
@@ -20,7 +25,6 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.mina.util.Base64;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -34,18 +38,15 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.ServerSession;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
+import org.codehaus.plexus.util.Base64;
 import org.codehaus.plexus.util.IOUtil;
 
 import com.jamesashepherd.start.StartException;
 import com.jamesashepherd.start.Startable;
 
 /**
- * 
- * 
- * 
  * @author James A. Shepherd
- * @version $Id$
- * @since 1.9.5
+ * @since 1.0
  */
 public class Start implements Startable {
 
@@ -53,11 +54,6 @@ public class Start implements Startable {
 
 	private SshClient client;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.jamesashepherd.start.Startable#startup()
-	 */
 	public void startup() throws StartException {
 
 		clientSessions = new LinkedList<ClientSession>();
@@ -162,7 +158,6 @@ public class Start implements Startable {
 								e.printStackTrace();
 							}
 						}
-
 					};
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -202,11 +197,6 @@ public class Start implements Startable {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.jamesashepherd.start.Startable#shutdown()
-	 */
 	public void shutdown() throws StartException {
 		try {
 			for(ClientSession session : clientSessions) {

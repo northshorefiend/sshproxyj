@@ -1,5 +1,5 @@
 /**
- * Copyright 2007 James A. Shepherd
+ * Copyright 2013 James A. Shepherd
  * http://www.JamesAshepherd.com/
  *
  * LICENCE: http://www.gnu.org/licenses/lgpl.html
@@ -13,11 +13,9 @@ package com.jamesashepherd.start;
  * a public no arg constructor.
  * </p>
  * 
- * In theory, {@link #shutdown} could be called before {@link #startup}.
  * 
  * @author James A. Shepherd
- * @version $Id: Startable.java 279 2008-03-04 13:40:18Z jas $
- * @since 0.5
+ * @since 1.0
  * 
  */
 public interface Startable {
@@ -25,7 +23,7 @@ public interface Startable {
 	/**
 	 * Entry point for application.
 	 * 
-	 * @since 0.5
+	 * @since 1.0
 	 */
 	void startup() throws StartException;
 
@@ -34,8 +32,7 @@ public interface Startable {
 	 * 
 	 * <p>Once shutdown, implementor will not be restarted</p>
 	 * 
-	 * @since 0.5
-	 * @see Reloadable
+	 * @since 1.0
 	 */
 	void shutdown() throws StartException;
 

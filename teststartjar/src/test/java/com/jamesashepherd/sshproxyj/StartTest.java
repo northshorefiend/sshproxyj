@@ -1,3 +1,9 @@
+/**
+ * Copyright 2013 James A. Shepherd
+ * http://www.JamesAshepherd.com/
+ *
+ * LICENCE: http://www.gnu.org/licenses/lgpl.html
+ */
 package com.jamesashepherd.sshproxyj;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +15,8 @@ import org.junit.contrib.java.lang.system.StandardOutputStreamLog;
 import com.jamesashepherd.start.StartException;
 
 /**
- * Unit test for simple Start.
+ * @author James A. Shepherd
+ * @since 1.0
  */
 public class StartTest {
 	
