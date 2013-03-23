@@ -6,39 +6,68 @@
  */
 package com.jamesashepherd.sshproxyj.core;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
+import com.jamesashepherd.start.ConfigurableStartable;
 import com.jamesashepherd.start.StartException;
-import com.jamesashepherd.start.Startable;
 
 /**
  * 
- * 
+ * Class that gets booted by sshproxyj-start
  * 
  * @author James A. Shepherd
  * @since 1.0
  */
-public class Start implements Startable {
+public class Start implements ConfigurableStartable {
+	public static final String SPRING_XML_PROPERTY = "spring.xml";
 	final Logger logger = LoggerFactory.getLogger(Start.class);
+	private File home;
+	private static Properties props;
+	private ApplicationContext context;
 
-	/* (non-Javadoc)
-	 * @see com.jamesashepherd.start.Startable#startup()
-	 */
 	@Override
 	public void startup() throws StartException {
-		// TODO Auto-generated method stub
-
+		logger.info("sshproxyj starting");
+		context = new FileSystemXmlApplicationContext(getSpringConfigURL());
 	}
 
-	/* (non-Javadoc)
-	 * @see com.jamesashepherd.start.Startable#shutdown()
-	 */
+	private String getSpringConfigURL() throws StartException {
+		File f = new File(home, props.getProperty(SPRING_XML_PROPERTY));
+		try {
+			return f.toURI().toURL().toString();
+		} catch (MalformedURLException e) {
+			throw new StartException("Failed to get Spring config URL", e);
+		}
+	}
+
 	@Override
 	public void shutdown() throws StartException {
-		// TODO Auto-generated method stub
+		logger.info("sshproxyj shutting down");
 
 	}
+
+	@Override
+	public void setHome(File home) {
+		this.home = home;
+	}
+
+	@Override
+	public void setProperties(Properties prop) {
+		this.props = prop;
+	}
+
+	public static Properties getProperties() {
+		return props;
+	}
+	
+	public ApplicationContext getApplicationContext() {
+		return context;
+	}
 }
-
-
