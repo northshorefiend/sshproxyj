@@ -130,11 +130,9 @@ public class Starter {
 			clazz = prop.getProperty(Starter.START_CLASS);
 			final Class c = Class.forName(clazz, true, cl);
 			if (!Startable.class.isAssignableFrom(c)) {
-				System.err
-						.println("ERROR: " + c.getName()
+				throw new StartException("ERROR: " + c.getName()
 								+ " is not an instance of "
 								+ Startable.class.getName());
-				System.exit(1);
 			}
 			if (ConfigurableStartable.class.isAssignableFrom(c)) {
 				ConfigurableStartable cs = (ConfigurableStartable) c
