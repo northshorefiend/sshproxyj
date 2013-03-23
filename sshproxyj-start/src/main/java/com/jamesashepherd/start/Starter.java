@@ -8,6 +8,8 @@ package com.jamesashepherd.start;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -66,6 +68,11 @@ public class Starter {
 	private static final String HOME_DIR_SEARCH = "home.dir.search";
 
 	/**
+	 * start.properties: path from home to config file
+	 */
+	private static final String CONFIG_FILE_PROPERTY = "config.file";
+
+	/**
 	 * Application ClassLoader
 	 */
 	private ClassLoader cl = null;
@@ -96,9 +103,10 @@ public class Starter {
 	 * 
 	 * @param prop
 	 *            start.properties
+	 * @throws StartException
 	 * @since 1.0
 	 */
-	public Starter(final Properties prop) {
+	public Starter(final Properties prop) throws StartException {
 
 		this.prop = prop;
 		setHome();
@@ -106,12 +114,19 @@ public class Starter {
 		Thread.currentThread().setContextClassLoader(cl);
 		Thread.currentThread().setName("Main");
 
-		//printClassloaders(this);
+		findStartable();
 
+		loadPolicy();
+	}
+
+	/**
+	 * @since 1.0
+	 * @param prop
+	 * @throws StartException
+	 */
+	private void findStartable() throws StartException {
 		String clazz = null;
 		try {
-
-			// load Startable
 			clazz = prop.getProperty(Starter.START_CLASS);
 			final Class c = Class.forName(clazz, true, cl);
 			if (!Startable.class.isAssignableFrom(c)) {
@@ -121,29 +136,70 @@ public class Starter {
 								+ Startable.class.getName());
 				System.exit(1);
 			}
-			startable = (Startable) c.newInstance();
-
+			if (ConfigurableStartable.class.isAssignableFrom(c)) {
+				ConfigurableStartable cs = (ConfigurableStartable) c
+						.newInstance();
+				configure(cs);
+			} else {
+				startable = (Startable) c.newInstance();
+			}
 		} catch (final ClassNotFoundException e) {
-			System.err.println("ERROR: Class " + clazz + " not found");
-			System.exit(1);
+			throw new StartException("ERROR: Class " + clazz + " not found", e);
 		} catch (final InstantiationException e) {
-			System.err.println("ERROR: Could not instantiate class " + clazz);
-			System.exit(1);
+			throw new StartException("ERROR: Could not instantiate class "
+					+ clazz, e);
 		} catch (final IllegalAccessException e) {
-			System.err.println("ERROR: Could not access class " + clazz);
+			throw new StartException("ERROR: Could not access class " + clazz,
+					e);
+		}
+	}
+
+	/**
+	 * Add homedir and properties
+	 * 
+	 * @since 1.0
+	 * @param cs
+	 * @throws StartException
+	 */
+	private void configure(ConfigurableStartable cs) throws StartException {
+		cs.setHome(home);
+		String path = System.getProperty(CONFIG_FILE_PROPERTY);
+
+		if (path == null) {
+			System.err.println("ERROR: Failed to find confing property");
 			System.exit(1);
 		}
 
-		// load Policy
+		Properties p = new Properties();
+		File f = new File(home, path);
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(f);
+			p.load(fis);
+		} catch (FileNotFoundException e) {
+			throw new StartException("Failed to open config file "
+					+ f.getAbsolutePath(), e);
+		} catch (IOException e) {
+			throw new StartException("Failed to read config file "
+					+ f.getAbsolutePath(), e);
+		}
+		cs.setProperties(p);
+	}
+
+	/**
+	 * @throws StartException
+	 * @since 1.0
+	 */
+	private void loadPolicy() throws StartException {
+		String clazz = null;
 		try {
 			clazz = this.prop.getProperty(Starter.SECURITY_POLICY);
 			if (clazz != null) {
 				final Class c = Class.forName(clazz, true, cl);
 				if (!Policy.class.isAssignableFrom(c)) {
-					System.err.println("ERROR: " + c.getName()
+					throw new StartException("ERROR: " + c.getName()
 							+ " is not an instance of "
 							+ Policy.class.getName());
-					System.exit(1);
 				}
 
 				if (!c.isAssignableFrom(Policy.getPolicy().getClass())) {
@@ -153,19 +209,17 @@ public class Starter {
 				if (c.isAssignableFrom(Policy.getPolicy().getClass())) {
 					System.out.println("Policy: " + clazz);
 				} else {
-					System.err.println("Can't set Policy " + clazz);
-					System.exit(1);
+					throw new StartException("Can't set Policy " + clazz);
 				}
 			}
 		} catch (final ClassNotFoundException e) {
-			System.err.println("ERROR: Class " + clazz + " not found");
-			System.exit(1);
+			throw new StartException("ERROR: Class " + clazz + " not found", e);
 		} catch (final InstantiationException e) {
-			System.err.println("ERROR: Could not instantiate class " + clazz);
-			System.exit(1);
+			throw new StartException("ERROR: Could not instantiate class "
+					+ clazz, e);
 		} catch (final IllegalAccessException e) {
-			System.err.println("ERROR: Could not access class " + clazz);
-			System.exit(1);
+			throw new StartException("ERROR: Could not access class " + clazz,
+					e);
 		}
 	}
 
@@ -191,28 +245,30 @@ public class Starter {
 					try {
 						l.add(pathname.toURI().toURL());
 					} catch (final MalformedURLException e) {
+						System.err.println("Failed to add "
+								+ pathname.getAbsolutePath() + " to classpath");
 						e.printStackTrace();
-						System.exit(1);
 					}
 				}
 				return b;
 			}
 		});
-		
-		for(URL url : l) {
+
+		for (URL url : l) {
 			System.out.println("ADDED: " + url);
 		}
-		
+
 		return l.toArray(new URL[0]);
 	}
 
 	/**
 	 * Works out where home dir for this application is. First from system
 	 * property, then environment variable, then searching.
+	 * @throws StartException 
 	 * 
 	 * @since 1.0
 	 */
-	private void setHome() {
+	private void setHome() throws StartException {
 
 		final LinkedList<String> l = new LinkedList<String>();
 		final String needle = prop.getProperty(Starter.HOME_SEARCH_FILE);
@@ -228,7 +284,6 @@ public class Starter {
 		System.out.println("Using '" + needle + "' to confirm home dir");
 		for (final Iterator<String> i = l.iterator(); i.hasNext();) {
 			String s = i.next();
-			// System.out.println(s);
 			if (s != null) {
 				s = s.replace('/', File.separatorChar).trim();
 				final File home = new File(s);
@@ -241,7 +296,8 @@ public class Starter {
 						System.out.println("Failed to canonicalize " + home);
 					}
 					System.setProperty(property, this.home.getAbsolutePath());
-					System.out.println(property + "=" + System.getProperty(property));
+					System.out.println(property + "="
+							+ System.getProperty(property));
 					return;
 				}
 			} else {
@@ -249,26 +305,22 @@ public class Starter {
 			}
 		}
 
-		System.err.println("ERROR: application home dir not found in: ");
-		System.err.println("       java system property " + property);
-		System.err.println("       environment variable " + homeEnv);
-		System.err.println("       in the paths " + l);
-		System.err.println("Searching for file " + needle);
-		System.exit(1);
+		throw new StartException(
+				"ERROR: application home dir not found in: java system property "
+						+ property + "; environment variable " + homeEnv
+						+ "; in the paths " + l + ". Searching for file "
+						+ needle);
 	}
 
 	/**
 	 * Invokes the application, by calling {@link #startable}.startup().
-	 * @throws StartException 
+	 * 
+	 * @throws StartException
 	 * 
 	 * @since 1.0
 	 */
 	public void startup() throws StartException {
-
-		System.out.println(homeEnv + "=" + home);
-
 		startable.startup();
-
 	}
 
 	/**
@@ -296,11 +348,11 @@ public class Starter {
 			current = current.getParent();
 		}
 	}
-
+	
 	/**
 	 * 
-	 * @return {@link Startable} object we are concerned with.
 	 * @since 1.0
+	 * @return the {@link Startable} we are concerned with
 	 */
 	public Startable getStartable() {
 		return startable;

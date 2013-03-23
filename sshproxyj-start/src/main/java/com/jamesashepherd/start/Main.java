@@ -147,7 +147,7 @@ public class Main {
 						Main.PORT_PROPERTY_KEY, 0).intValue();
 
 				String startcode = getStartCode();
-				
+
 				// need a valid port
 				if (!isValidPort(startport)) {
 					System.err.println("ERROR: Need a valid port to listen on");
@@ -187,10 +187,9 @@ public class Main {
 	}
 
 	private static String getStartCode() {
-		String startcode = System.getProperty(
-				Main.CODE_PROPERTY_KEY, null);
+		String startcode = System.getProperty(Main.CODE_PROPERTY_KEY, null);
 
-		if(startcode != null && startcode.length() == 0)
+		if (startcode != null && startcode.length() == 0)
 			startcode = null;
 		return startcode;
 	}
@@ -237,10 +236,11 @@ public class Main {
 	 *            properties file to override defaults, may be null
 	 * @param startcodefile
 	 *            where to output the start code, if not null
+	 * @throws StartException
 	 * @since 1.0
 	 */
 	private static void startup(final int startport, final String startcode,
-			final String file, final File startcodefile) {
+			final String file, final File startcodefile) throws StartException {
 
 		// load properties
 		final Properties prop = Main.loadProperties(file);
@@ -253,23 +253,16 @@ public class Main {
 					startcode, startcodefile);
 			l.start();
 		} catch (final UnknownHostException e) {
-			System.err
-					.println("Could not listen for shutdown on 127.0.0.1 on port: "
+			throw new StartException(
+					"Could not listen for shutdown on 127.0.0.1 on port: "
 							+ startport);
-			System.exit(1);
 		} catch (final IOException e) {
-			System.err
-					.println("Could not listen for shutdown on 127.0.0.1 on port: "
+			throw new StartException(
+					"Could not listen for shutdown on 127.0.0.1 on port: "
 							+ startport);
-			System.exit(1);
 		}
 
-		try {
-			s.startup();
-		} catch (StartException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		s.startup();
 	}
 
 	/**
@@ -277,17 +270,17 @@ public class Main {
 	 * 
 	 * @param file
 	 * @return Properties
+	 * @throws StartException 
 	 * @since 1.0
 	 */
-	private static Properties loadProperties(final String file) {
+	private static Properties loadProperties(final String file) throws StartException {
 
 		File propFile = null;
 		if (file != null) {
 			propFile = new File(file);
 			if (!propFile.isFile() || !propFile.canRead()) {
-				System.err.println("ERROR: Can't find properties file: "
+				throw new StartException("ERROR: Can't find properties file: "
 						+ propFile);
-				System.exit(1);
 			}
 		}
 
@@ -301,14 +294,12 @@ public class Main {
 			if (dis != null) {
 				propDef.load(dis);
 			} else {
-				System.err.println("ERROR: Could not load default "
+				throw new StartException("ERROR: Could not load default "
 						+ Main.START_PROPERTIES_RESOURCE + " file");
-				System.exit(1);
 			}
 		} catch (final IOException e) {
-			System.err.println("ERROR: Could not load default "
+			throw new StartException("ERROR: Could not load default "
 					+ Main.START_PROPERTIES_RESOURCE + " file");
-			System.exit(1);
 		}
 
 		// now load in commandline start.properties
@@ -320,13 +311,11 @@ public class Main {
 				is = new FileInputStream(propFile);
 				prop.load(is);
 			} catch (final FileNotFoundException e) {
-				System.err.println("ERROR: Could not load properties file: "
-						+ propFile);
-				System.exit(1);
+				throw new StartException("ERROR: Could not load properties file: "
+						+ propFile, e);
 			} catch (final IOException e) {
-				System.err.println("ERROR: Could not load properties file: "
-						+ propFile);
-				System.exit(1);
+				throw new StartException("ERROR: Could not load properties file: "
+						+ propFile, e);
 			} finally {
 				if (is != null) {
 					try {
@@ -347,9 +336,10 @@ public class Main {
 	 *            port to contact
 	 * @param startcode
 	 *            code to use
+	 * @throws StartException 
 	 * @since 1.0
 	 */
-	private static void shutdown(final int startport, final String startcode) {
+	private static void shutdown(final int startport, final String startcode) throws StartException {
 		Socket socket = null;
 		PrintWriter out = null;
 		BufferedReader in = null;
@@ -372,12 +362,9 @@ public class Main {
 			in.close();
 			socket.close();
 		} catch (final UnknownHostException e) {
-			System.err
-					.println("ERROR: Can't connect to 127.0.0.1:" + startport);
-			System.exit(1);
+			throw new StartException("ERROR: Can't connect to 127.0.0.1:" + startport, e);
 		} catch (final IOException e) {
-			System.err.println("ERROR: Can't talk to 127.0.0.1:" + startport);
-			System.exit(1);
+			throw new StartException("ERROR: Can't talk to 127.0.0.1:" + startport, e);
 		} finally {
 			if (out != null) {
 				out.close();
