@@ -74,6 +74,17 @@ public class MainTest {
 				startProperties.getProperty("home.search.file"));
 		needle.createNewFile();
 		toDelete.add(needle);
+		
+		File confDir = new File(home, "conf");
+		confDir.mkdir();
+		toDelete.add(confDir);
+		
+		File conf = new File(confDir, "sshproxyj.conf");
+		fos = new FileOutputStream(conf);
+		is = getClass().getResourceAsStream(
+				"sshproxyj.conf");
+		IOUtils.copy(is, fos);
+		toDelete.add(conf);
 	}
 
 	@Test

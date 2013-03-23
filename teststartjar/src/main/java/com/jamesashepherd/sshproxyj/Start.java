@@ -6,18 +6,24 @@
  */
 package com.jamesashepherd.sshproxyj;
 
+import java.io.File;
+import java.util.Properties;
+
+import com.jamesashepherd.start.ConfigurableStartable;
 import com.jamesashepherd.start.StartException;
-import com.jamesashepherd.start.Startable;
 
 /**
  * @author James A. Shepherd
  * @since 1.0
  */
-public class Start implements Startable {
+public class Start implements ConfigurableStartable {
 	private boolean shutdown = false;
+	private File home;
+	private Properties props;
 
+	@Override
 	public void startup() throws StartException {
-		System.out.println("123456789 Started qwertyuiop");
+		System.out.println(props.getProperty("output.string"));
 
 		if ("1".equals(System.getProperty("teststart.run"))) {
 			while (!getShutdown()) {
@@ -37,7 +43,18 @@ public class Start implements Startable {
 		return shutdown;
 	}
 
+	@Override
 	synchronized public void shutdown() throws StartException {
 		shutdown = true;
+	}
+
+	@Override
+	public void setHome(File home) {
+		this.home = home;
+	}
+
+	@Override
+	public void setProperties(Properties prop) {
+		this.props = prop;
 	}
 }

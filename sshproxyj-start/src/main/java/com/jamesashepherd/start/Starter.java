@@ -140,6 +140,7 @@ public class Starter {
 				ConfigurableStartable cs = (ConfigurableStartable) c
 						.newInstance();
 				configure(cs);
+				startable = cs;
 			} else {
 				startable = (Startable) c.newInstance();
 			}
@@ -163,11 +164,10 @@ public class Starter {
 	 */
 	private void configure(ConfigurableStartable cs) throws StartException {
 		cs.setHome(home);
-		String path = System.getProperty(CONFIG_FILE_PROPERTY);
+		String path = prop.getProperty(CONFIG_FILE_PROPERTY);
 
 		if (path == null) {
-			System.err.println("ERROR: Failed to find confing property");
-			System.exit(1);
+			throw new StartException("ERROR: Failed to find config property");
 		}
 
 		Properties p = new Properties();

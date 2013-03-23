@@ -255,11 +255,11 @@ public class Main {
 		} catch (final UnknownHostException e) {
 			throw new StartException(
 					"Could not listen for shutdown on 127.0.0.1 on port: "
-							+ startport);
+							+ startport, e);
 		} catch (final IOException e) {
 			throw new StartException(
 					"Could not listen for shutdown on 127.0.0.1 on port: "
-							+ startport);
+							+ startport, e);
 		}
 
 		s.startup();

@@ -8,6 +8,8 @@ package com.jamesashepherd.sshproxyj;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Properties;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.StandardOutputStreamLog;
@@ -26,6 +28,9 @@ public class StartTest {
 	@Test
 	public void runs() throws StartException {
 		Start s = new Start();
+		Properties p = new Properties();
+		p.setProperty("output.string", "123456789 Started qwertyuiop");
+		s.setProperties(p);
 		s.startup();
 		assertEquals("123456789 Started qwertyuiop\n", log.getLog());
 	}
