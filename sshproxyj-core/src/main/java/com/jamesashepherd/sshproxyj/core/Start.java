@@ -8,11 +8,14 @@ package com.jamesashepherd.sshproxyj.core;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.security.Security;
 import java.util.Properties;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import com.jamesashepherd.start.ConfigurableStartable;
@@ -28,13 +31,14 @@ import com.jamesashepherd.start.StartException;
 public class Start implements ConfigurableStartable {
 	public static final String SPRING_XML_PROPERTY = "spring.xml";
 	final Logger logger = LoggerFactory.getLogger(Start.class);
-	private File home;
+	private static File home;
 	private static Properties props;
-	private ApplicationContext context;
+	private AbstractApplicationContext context;
 
 	@Override
 	public void startup() throws StartException {
 		logger.info("sshproxyj starting");
+		Security.addProvider(new BouncyCastleProvider());
 		context = new FileSystemXmlApplicationContext(getSpringConfigURL());
 	}
 
@@ -50,12 +54,16 @@ public class Start implements ConfigurableStartable {
 	@Override
 	public void shutdown() throws StartException {
 		logger.info("sshproxyj shutting down");
-
+		context.close();
 	}
 
 	@Override
 	public void setHome(File home) {
 		this.home = home;
+	}
+
+	public static File getHome() {
+		return home;
 	}
 
 	@Override
@@ -66,7 +74,7 @@ public class Start implements ConfigurableStartable {
 	public static Properties getProperties() {
 		return props;
 	}
-	
+
 	public ApplicationContext getApplicationContext() {
 		return context;
 	}

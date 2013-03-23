@@ -6,4 +6,8 @@
 
 	<bean id="props" class="com.jamesashepherd.sshproxyj.core.Start"
 		factory-method="getProperties" />
+		
+	<bean id="home" class="com.jamesashepherd.sshproxyj.core.Start"
+		factory-method="getHome" />
+
 </beans>

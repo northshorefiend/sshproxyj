@@ -51,6 +51,13 @@ public class StartTest {
 				"spring.xml");
 		IOUtils.copy(is, fos);
 		toDelete.add(conf);
+		
+		conf = new File(confDir, "spring-echo.xml");
+		fos = new FileOutputStream(conf);
+		is = getClass().getResourceAsStream(
+				"spring.xml");
+		IOUtils.copy(is, fos);
+		toDelete.add(conf);
 	}
 	
 	@Test
@@ -61,8 +68,22 @@ public class StartTest {
 		s.setHome(home);
 		s.setProperties(p);
 		s.startup();
-		Properties p2 = s.getApplicationContext().getBean("props", Properties.class);
-		assertTrue(p2 == p);
+		assertTrue(s.getApplicationContext().getBean("props", Properties.class) == p);
+		assertTrue(s.getApplicationContext().getBean("home", File.class) == home);
+		s.shutdown();
+	}
+
+	@Test
+	public void singleUser() throws StartException, IOException {
+		Properties p = new Properties();
+		p.load(getClass().getResourceAsStream("echo.properties"));
+		Start s = new Start();
+		s.setHome(home);
+		s.setProperties(p);
+		s.startup();
+		
+		// TODO create client to connect to 6667 and see if it echos
+		
 		s.shutdown();
 	}
 	

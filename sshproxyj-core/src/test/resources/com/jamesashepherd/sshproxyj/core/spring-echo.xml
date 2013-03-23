@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<import resource="spring.xml" />
+
+	<bean id="clientSessions"
+		class="java.util.concurrent.CopyOnWriteArrayList<org.apache.sshd.ClientSessions>" />
+
+	<bean id="sshClient" class="org.apache.sshd.SshClient"
+		factory-method="setUpDefaultClient" />
+
+	<bean id="hostKeyPairProvider"
+		class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
+		<constructor-arg
+			value="#{ home.getAbsolutePath + '/' + props['host.key.file'] }" />
+	</bean>
+
+	<bean id="shellFactory" class="com.jamesashepherd.sshproxyj.core.ShellFactoryEcho" />
+
+	<bean id="testPublicKey" class="com.jamesashepherd.sshproxy.core.UtilsTest"
+		factory-method="testPublicKey" />
+
+	<bean id="testUserPublicKey"
+		class="com.jamesashepherd.sshproxyj.core.RSAPublicKeyFromString">
+		<constructor-arg ref="testPublicKey" />
+	</bean>
+
+	<bean id="publickeyAuthenticator"
+		class="com.jamesashepherd.sshproxyj.core.SingleUserPublicKeyAuthenticator">
+		<property name="username" value="testuser" />
+		<property name="publicKey" ref="testUserPublicKey" />
+	</bean>
+
+	<bean id="sshServer" class="org.apache.sshd.SshServer">
+		<property name="port" value="#{ props['listen.port'] }" />
+		<property name="keyPairProvider" ref="hostKeyPairProvider" />
+		<property name="sshClient" ref="sshClient" />
+		<property name="shellFactory" ref="shellFactory" />
+		<property name="publickeyAuthenticator" ref="publickeyAuthenticator" />
+	</bean>
+</beans>
