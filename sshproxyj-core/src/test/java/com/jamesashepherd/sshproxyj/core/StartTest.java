@@ -36,14 +36,45 @@ import com.jamesashepherd.start.StartException;
  */
 public class StartTest {
 
+	private final class StringBuilderOutputStream extends OutputStream {
+		private final StringBuilder sb;
+
+		private StringBuilderOutputStream(StringBuilder sb) {
+			this.sb = sb;
+		}
+
+		@Override
+		public void write(int arg0) throws IOException {
+			String s = new String(new byte[] { (byte) arg0 });
+			sb.append(s);
+		}
+	}
+
+	private final class StringInputStream extends InputStream {
+		private final String command;
+		byte[] commandBytes;
+		int at = 0;
+
+		private StringInputStream(String command) {
+			this.command = command;
+			commandBytes = command.getBytes();
+		}
+
+		@Override
+		public int read() throws IOException {
+			return at < commandBytes.length ? commandBytes[at++] : -1;
+		}
+	}
+
 	private List<File> toDelete;
 	private File home;
 
 	@BeforeClass
 	static public void setLogging() {
-		System.setProperty("org.slf4j.simpleLogger.log.com.jamesashepherd", "debug");
+		System.setProperty("org.slf4j.simpleLogger.log.com.jamesashepherd",
+				"debug");
 	}
-	
+
 	@Before
 	public void setupTmp() throws IOException {
 		toDelete = new ArrayList<File>();
@@ -69,7 +100,7 @@ public class StartTest {
 		toDelete.add(conf);
 	}
 
-	@Test
+	@Test(timeout=30000)
 	public void springStartup() throws StartException {
 		Properties p = new Properties();
 		p.setProperty(Start.SPRING_XML_PROPERTY, "conf/spring.xml");
@@ -82,9 +113,9 @@ public class StartTest {
 		s.shutdown();
 	}
 
-	@Test
-	public void singleUser() throws StartException, IOException,
-			BeansException, NumberFormatException, SshProxyJException, InterruptedException {
+	@Test(timeout=30000)
+	public void testEcho() throws StartException, IOException, BeansException,
+			NumberFormatException, SshProxyJException, InterruptedException {
 		Properties p = new Properties();
 		p.load(getClass().getResourceAsStream("echo.properties"));
 		Start s = new Start();
@@ -102,38 +133,42 @@ public class StartTest {
 						Integer.parseInt(p.getProperty("server.sshd.port")),
 						"testuser", keyPair);
 
-		final String command = "alrkuhliuhaerg\n";
-		shell.setIn(new InputStream() {
-			byte[] commandBytes = command.getBytes();
-			int at = 0;
+		String command = "alrkuhliuhaerg\n";
+		shell.setIn(new StringInputStream(command));
 
-			@Override
-			public int read() throws IOException {
-				return at < commandBytes.length ? commandBytes[at++] : -1;
-			}
-		});
-
-		final StringBuilder sb = new StringBuilder();
-		OutputStream out = new OutputStream() {
-
-			@Override
-			public void write(int arg0) throws IOException {
-				String s = new String(new byte[] { (byte) arg0 });
-				sb.append(s);
-			}
-
-		};
+		StringBuilder sb = new StringBuilder();
+		OutputStream out = new StringBuilderOutputStream(sb);
 		shell.setOut(out);
 		shell.setErr(out);
 		shell.open();
-		
+
 		Thread.sleep(1000);
-		
+
 		shell.close();
 
 		assertEquals(command, sb.toString());
 
 		s.shutdown();
+	}
+
+	@Test(timeout=30000,expected=SshProxyJException.class)
+	public void testEchoFail() throws IOException, SshProxyJException, StartException {
+		Properties p = new Properties();
+		p.load(getClass().getResourceAsStream("echo.properties"));
+		Start s = new Start();
+		s.setHome(home);
+		s.setProperties(p);
+		s.startup();
+
+		KeyPair keyPair2 = KeyUtils.makeKeyPair(UtilsTest.test2PublicKey(),
+				UtilsTest.test2PrivateKey());
+
+		SshShell shell = s
+				.getApplicationContext()
+				.getBean("sshProxyJServer", SshProxyJServer.class)
+				.getSshShell("localhost",
+						Integer.parseInt(p.getProperty("server.sshd.port")),
+						"testuser", keyPair2);
 	}
 
 	@After

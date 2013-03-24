@@ -109,6 +109,10 @@ public class SshProxyJServer implements Startable {
 						+ username + "@" + host + ":" + port);
 			}
 
+			if ((ret & ClientSession.AUTHED) == 0)
+				throw new SshProxyJException("Failed to authenticate: "
+						+ username + "@" + host + ":" + port);
+			
 			channel = session.createChannel("shell");
 		} catch (InterruptedException e) {
 			throw new SshProxyJException("Failed to start session", e);

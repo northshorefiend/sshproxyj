@@ -114,7 +114,7 @@ public class MainTest {
 				log.getLog());
 	}
 
-	@Test
+	@Test(timeout=30000)
 	public void runonly() {
 		System.setProperty("teststart.run", "0");
 		Main.main(new String[] { "--runonly" });
@@ -125,7 +125,7 @@ public class MainTest {
 		return startoutput.matcher(output).find();
 	}
 
-	@Test
+	@Test(timeout=30000)
 	public void runonlyNoOption() {
 		System.setProperty("teststart.run", "0");
 		Main.main(new String[0]);
@@ -149,7 +149,7 @@ public class MainTest {
 		Main.main(new String[] { "--startup" });
 	}
 
-	@Test
+	@Test(timeout=30000)
 	public void startup() throws InterruptedException {
 		System.setProperty("teststart.run", "1");
 		System.setProperty("start.port", "6668");
@@ -172,7 +172,7 @@ public class MainTest {
 		assertFalse(server.isAlive());
 	}
 
-	@Test
+	@Test(timeout=30000)
 	public void startupWithoutCode() throws InterruptedException,
 			FileNotFoundException, IOException {
 		System.setProperty("teststart.run", "1");

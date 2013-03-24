@@ -23,14 +23,32 @@ import org.slf4j.LoggerFactory;
 public class UtilsTest {
 	final Logger logger = LoggerFactory.getLogger(UtilsTest.class);
 	
-	static public String testPublicKey() throws IOException {
-		InputStream is = UtilsTest.class.getResourceAsStream("id_rsa.pub");
+	/**
+	 * @since 1.0
+	 * @return
+	 * @throws IOException
+	 */
+	private static String stringFromResource(String resourcePath) throws IOException {
+		InputStream is = UtilsTest.class.getResourceAsStream(resourcePath);
 		return IOUtils.toString(is);
 	}
+
+	static public String testPublicKey() throws IOException {
+		return stringFromResource("id_rsa.pub");
+	}
+
 	
 	static public String testPrivateKey() throws IOException {
-		InputStream is = UtilsTest.class.getResourceAsStream("id_rsa");
-		return IOUtils.toString(is);
+		return stringFromResource("id_rsa");
+	}
+	
+	static public String test2PublicKey() throws IOException {
+		return stringFromResource("id_rsa2.pub");
+	}
+
+	
+	static public String test2PrivateKey() throws IOException {
+		return stringFromResource("id_rsa2");
 	}
 }
 
