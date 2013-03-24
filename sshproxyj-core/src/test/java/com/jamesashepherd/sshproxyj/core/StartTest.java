@@ -126,18 +126,14 @@ public class StartTest {
 	public void testEcho() throws StartException, IOException, BeansException,
 			NumberFormatException, SshProxyJException, InterruptedException {
 		Properties p = new Properties();
-		p.load(getClass().getResourceAsStream("echo.properties"));
-		Start s = new Start();
-		s.setHome(home);
-		s.setProperties(p);
-		s.startup();
+		Start s = setupEchoServer(p);
 
 		SshShell shell = s
 				.getApplicationContext()
 				.getBean("sshProxyJServer", SshProxyJServer.class)
 				.getSshShell("localhost",
 						Integer.parseInt(p.getProperty("server.sshd.port")),
-						"testuser", keyPair);
+						"testuser", keyPair, "shell");
 
 		String command = "alrkuhliuhaerg\n";
 		shell.setIn(new StringInputStream(command));
@@ -155,6 +151,23 @@ public class StartTest {
 		assertEquals(command, sb.toString());
 
 		s.shutdown();
+	}
+
+	/**
+	 * @since 1.0
+	 * @param p
+	 * @return
+	 * @throws IOException
+	 * @throws StartException
+	 */
+	private Start setupEchoServer(Properties p) throws IOException,
+			StartException {
+		p.load(getClass().getResourceAsStream("echo.properties"));
+		Start s = new Start();
+		s.setHome(home);
+		s.setProperties(p);
+		s.startup();
+		return s;
 	}
 
 	@Test(timeout = 30000, expected = SshProxyJException.class)
@@ -176,7 +189,7 @@ public class StartTest {
 					.getSshShell(
 							"localhost",
 							Integer.parseInt(p.getProperty("server.sshd.port")),
-							"testuser", keyPair2);
+							"testuser", keyPair2, "shell");
 		} finally {
 			if (shell != null)
 				shell.close();
@@ -185,8 +198,10 @@ public class StartTest {
 		}
 	}
 
-	@Test
-	public void passThru() throws IOException, StartException {
+	@Test//(timeout = 30000)
+	public void passThru() throws IOException, StartException, BeansException,
+			SshProxyJException, InterruptedException {
+		System.err.println("PassThru Started");
 		Properties p = new Properties();
 		p.load(getClass().getResourceAsStream("passthru.properties"));
 		Start s = new Start();
@@ -194,49 +209,80 @@ public class StartTest {
 		s.setProperties(p);
 		s.startup();
 
+		System.err.println("Started server");
+		
 		MemoryUserPublicKeyService userService = s.getApplicationContext()
 				.getBean("userPublicKeyService",
 						MemoryUserPublicKeyService.class);
 
-		userService.addUser("testuser", keyPair.getPublic());
+		userService.addUser("testuser", keyPair2.getPublic());
 
 		MemoryRemoteUserCredentialsService credentialsService = s
 				.getApplicationContext().getBean(
 						"remoteUserCredentialsService",
 						MemoryRemoteUserCredentialsService.class);
-		credentialsService.addCredentials("testuser", "root@localhost:4321", new ProxyCredentials() {
-			
-			@Override
-			public String getUsername() {
-				return "testuser";
-			}
-			
-			@Override
-			public String getRemoteUsername() {
-				return "root";
-			}
-			
-			@Override
-			public int getRemotePort() {
-				return 4321;
-			}
-			
-			@Override
-			public String getRemoteHost() {
-				return "localhost";
-			}
-			
-			@Override
-			public KeyPair getKeyPair() {
-				return keyPair2;
-			}
-			
-			@Override
-			public String getCommand() {
-				return "root@localhost:4321";
-			}
-		});
+		credentialsService.addCredentials("testuser", "testuser@localhost:6667",
+				new ProxyCredentials() {
+
+					@Override
+					public String getUsername() {
+						return "testuser";
+					}
+
+					@Override
+					public String getRemoteUsername() {
+						return "testuser";
+					}
+
+					@Override
+					public int getRemotePort() {
+						return 6667;
+					}
+
+					@Override
+					public String getRemoteHost() {
+						return "localhost";
+					}
+
+					@Override
+					public KeyPair getKeyPair() {
+						return keyPair;
+					}
+
+					@Override
+					public String getCommand() {
+						return "testuser@localhost:6667";
+					}
+				});
 		
+		System.err.println("Starting Echo Server");
+		Properties p2 = new Properties();
+		Start echo = setupEchoServer(p2);
+		System.err.println("Echo Server Started");
+		
+		SshShell shell = echo
+				.getApplicationContext()
+				.getBean("sshProxyJServer", SshProxyJServer.class)
+				.getSshShell("localhost",
+						Integer.parseInt(p.getProperty("server.sshd.port")),
+						"testuser", keyPair2, "testuser@localhost:6667");
+
+		String command = "alrkuhliuhaerg\n";
+		shell.setIn(new StringInputStream(command));
+
+		StringBuilder sb = new StringBuilder();
+		OutputStream out = new StringBuilderOutputStream(sb);
+		shell.setOut(out);
+		shell.setErr(out);
+		shell.open();
+
+		Thread.sleep(1000);
+
+		shell.close();
+
+		assertEquals(command, sb.toString());
+
+		echo.shutdown();
 		s.shutdown();
 	}
 

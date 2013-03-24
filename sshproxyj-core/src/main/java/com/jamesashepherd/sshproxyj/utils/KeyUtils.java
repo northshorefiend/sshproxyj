@@ -25,13 +25,14 @@ import com.jamesashepherd.sshproxyj.SshProxyJException;
  * @since 1.0
  */
 public class KeyUtils {
-	final Logger logger = LoggerFactory.getLogger(KeyUtils.class);
+	final static Logger logger = LoggerFactory.getLogger(KeyUtils.class);
 	
 	public static boolean isSame(PublicKey pk1, PublicKey pk2) throws SshProxyJException {
 		String type1 = pk1.getAlgorithm();
 		String type2 = pk2.getAlgorithm();
 		
 		if(type1.equals(type2)) {
+			logger.debug("Keys same type");
 			if(type1.equals("DSA")) {
 				return ((DSAPublicKey) pk1).getY().equals(
 						((DSAPublicKey) pk2).getY());
@@ -43,6 +44,7 @@ public class KeyUtils {
 			}
 		}
 		
+		logger.debug("Keys not the same type");
 		return false;
 	}
 

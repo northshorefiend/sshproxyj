@@ -43,8 +43,12 @@ public class UserPublicKeyAuthenticator implements PublickeyAuthenticator {
 		try {
 			PublicKey pk = getUserPublicKeyService().lookupUser(username);
 			if (pk != null) {
-				return KeyUtils.isSame(pk, key);
+				logger.debug("Got PublicKey for '{}'", username);
+				boolean b = KeyUtils.isSame(pk, key);
+				logger.debug("Keys match: {}", b);
+				return b;
 			}
+			logger.debug("Failed to find PublicKey for username '{}'", username);
 		} catch (SshProxyJException e) {
 			logger.info("Failed to check public key for user '" + username
 					+ "'", e);

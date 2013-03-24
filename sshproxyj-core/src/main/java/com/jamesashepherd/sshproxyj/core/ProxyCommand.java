@@ -97,8 +97,8 @@ public class ProxyCommand implements Command {
 	public void start(Environment env) throws IOException {
 		String username = env.getEnv().get(Environment.ENV_USER);
 
-		ProxyCredentials pc = getRemoteUserCredentialsService().lookupUserCommand(username,
-				command);
+		ProxyCredentials pc = getRemoteUserCredentialsService()
+				.lookupUserCommand(username, command);
 
 		if (pc != null) {
 			try {
@@ -108,25 +108,11 @@ public class ProxyCommand implements Command {
 				logger.info("Started Remote Session {}@{}:{} for {}",
 						pc.getRemoteUsername(), pc.getRemoteHost(),
 						pc.getRemotePort(), pc.getUsername());
-				session.authPublicKey(pc.getRemoteUsername(), pc.getKeyPair());
-
-				int ret = session.waitFor(ClientSession.CLOSED
-						| ClientSession.AUTHED,
-						getConnectTimeoutSeconds() * 1000);
-
-				if ((ret & ClientSession.CLOSED) != 0) {
+				if (session
+						.authPublicKey(pc.getRemoteUsername(), pc.getKeyPair())
+						.await().isFailure()) {
 					logger.info(
-							"Connection closed abnormally on first attempt to connect {}@{}:{} for {}",
-							pc.getRemoteUsername(), pc.getRemoteHost(),
-							pc.getRemotePort(), pc.getUsername());
-					throw new IOException("Connection Closed "
-							+ pc.getRemoteUsername() + "@" + pc.getRemoteHost()
-							+ ":" + pc.getRemotePort() + " for "
-							+ pc.getUsername());
-				}
-
-				if ((ret & ClientSession.AUTHED) == 0) {
-					logger.info("Failed to authenticate {}@{}:{} for {}",
+							"Immediately failed to authenticate {}@{}:{} for {}",
 							pc.getRemoteUsername(), pc.getRemoteHost(),
 							pc.getRemotePort(), pc.getUsername());
 					throw new IOException("Failed to authenticate: "
@@ -134,6 +120,9 @@ public class ProxyCommand implements Command {
 							+ ":" + pc.getRemotePort() + " for "
 							+ pc.getUsername());
 				}
+
+				logger.debug("KeyPair Accepted");
+
 				getClientSessions().add(session);
 				channel = session.createChannel("shell");
 				channel.setIn(in);
@@ -167,10 +156,12 @@ public class ProxyCommand implements Command {
 						"Failed to connect: " + pc.getRemoteUsername() + "@"
 								+ pc.getRemoteHost() + ":" + pc.getRemotePort()
 								+ " for " + pc.getUsername(), e);
+			} finally {
+				logger.debug("Leaving");
 			}
 			return;
 		}
-
+		logger.info("Denied username '{}'", username);
 		exitCallback.onExit(1, "You shall not pass");
 	}
 
@@ -215,7 +206,8 @@ public class ProxyCommand implements Command {
 		return credentialsService;
 	}
 
-	public void setRemoteUserCredentialsService(RemoteUserCredentialsService credentialsService) {
+	public void setRemoteUserCredentialsService(
+			RemoteUserCredentialsService credentialsService) {
 		this.credentialsService = credentialsService;
 	}
 }

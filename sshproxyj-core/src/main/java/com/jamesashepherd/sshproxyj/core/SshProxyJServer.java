@@ -92,26 +92,30 @@ public class SshProxyJServer implements Startable {
 		this.clientSessions = clientSessions;
 	}
 
+	/**
+	 * 
+	 * @since 1.0
+	 * @param host
+	 * @param port
+	 * @param username
+	 * @param keyPair
+	 * @param command shell for a shell, other for sending a command
+	 * @return
+	 * @throws SshProxyJException
+	 */
 	public SshShell getSshShell(String host, int port, String username,
-			KeyPair keyPair) throws SshProxyJException {
+			KeyPair keyPair, String command) throws SshProxyJException {
 		try {
 			ClientSession session = getSshClient().connect(host, port).await()
 					.getSession();
-			session.authPublicKey(username, keyPair);
-
-			int ret = session.waitFor(ClientSession.CLOSED
-					| ClientSession.AUTHED, getConnectTimeoutSeconds() * 1000);
-
-			if ((ret & ClientSession.CLOSED) != 0) {
-				throw new SshProxyJException("Failed to connect to: "
+			if(session.authPublicKey(username, keyPair).await().isFailure()) {
+				throw new SshProxyJException("Immediately failed to authenticate: "
 						+ username + "@" + host + ":" + port);
 			}
 
-			if ((ret & ClientSession.AUTHED) == 0)
-				throw new SshProxyJException("Failed to authenticate: "
-						+ username + "@" + host + ":" + port);
-
-			ClientChannel channel = session.createChannel("shell");
+			ClientChannel channel = command.equals("shell") ? session
+					.createChannel("shell") : session
+					.createExecChannel(command);
 			getClientSessions().add(session);
 			return new SshShell(session, channel, getClientSessions());
 		} catch (InterruptedException e) {
