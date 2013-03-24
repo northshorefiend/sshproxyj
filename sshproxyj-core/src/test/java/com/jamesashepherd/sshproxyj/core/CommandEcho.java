@@ -96,24 +96,34 @@ public class CommandEcho implements Command {
 				Writer w = new OutputStreamWriter(out);
 				BufferedWriter bw = new BufferedWriter(w);
 
+				logger.info("Starting");
 				while (!getStop()) {
 					try {
+						logger.debug("Waiting...");
 						String line = br.readLine();
-						logger.debug("Echoing: " + line);
 						
-						if (line == null)
+						if (line == null) {
+							logger.debug("Stream closed");
 							break;
+						}
 
+						logger.debug("Echoing: " + line);
 						bw.write(line);
+						bw.write('\n');
+						bw.flush();
+						w.flush();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
 				
+				logger.info("Exiting");
 				exitCallback.onExit(0);
 			}
 
 		});
+		
+		thread.start();
 	}
 
 	synchronized private boolean getStop() {

@@ -23,6 +23,7 @@ public class ShellFactoryEcho implements Factory<Command> {
 
 	@Override
 	public Command create() {
+		logger.debug("Creating CommandEcho");
 		return new CommandEcho();
 	}
 }

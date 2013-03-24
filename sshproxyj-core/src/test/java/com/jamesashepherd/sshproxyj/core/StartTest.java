@@ -6,12 +6,14 @@
  */
 package com.jamesashepherd.sshproxyj.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.BeansException;
 
@@ -36,6 +39,11 @@ public class StartTest {
 	private List<File> toDelete;
 	private File home;
 
+	@BeforeClass
+	static public void setLogging() {
+		System.setProperty("org.slf4j.simpleLogger.log.com.jamesashepherd", "debug");
+	}
+	
 	@Before
 	public void setupTmp() throws IOException {
 		toDelete = new ArrayList<File>();
@@ -76,7 +84,7 @@ public class StartTest {
 
 	@Test
 	public void singleUser() throws StartException, IOException,
-			BeansException, NumberFormatException, SshProxyJException {
+			BeansException, NumberFormatException, SshProxyJException, InterruptedException {
 		Properties p = new Properties();
 		p.load(getClass().getResourceAsStream("echo.properties"));
 		Start s = new Start();
@@ -93,7 +101,37 @@ public class StartTest {
 				.getSshShell("localhost",
 						Integer.parseInt(p.getProperty("server.sshd.port")),
 						"testuser", keyPair);
+
+		final String command = "alrkuhliuhaerg\n";
+		shell.setIn(new InputStream() {
+			byte[] commandBytes = command.getBytes();
+			int at = 0;
+
+			@Override
+			public int read() throws IOException {
+				return at < commandBytes.length ? commandBytes[at++] : -1;
+			}
+		});
+
+		final StringBuilder sb = new StringBuilder();
+		OutputStream out = new OutputStream() {
+
+			@Override
+			public void write(int arg0) throws IOException {
+				String s = new String(new byte[] { (byte) arg0 });
+				sb.append(s);
+			}
+
+		};
+		shell.setOut(out);
+		shell.setErr(out);
+		shell.open();
+		
+		Thread.sleep(1000);
+		
 		shell.close();
+
+		assertEquals(command, sb.toString());
 
 		s.shutdown();
 	}

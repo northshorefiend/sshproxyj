@@ -15,6 +15,8 @@ import org.apache.sshd.ClientSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jamesashepherd.sshproxyj.SshProxyJException;
+
 /**
  * 
  * 
@@ -29,10 +31,25 @@ public class SshShell {
 	private List<ClientSession> clientSessions;
 
 	public SshShell(ClientSession session, ClientChannel channel,
-			List<ClientSession> clientSessions) {
+			List<ClientSession> clientSessions) throws SshProxyJException {
 		this.session = session;
 		this.channel = channel;
 		this.clientSessions = clientSessions;
+	}
+
+	/**
+	 * Should be called after setting {@link #setIn(InputStream)}
+	 * {@link #setOut(OutputStream)} {@link #setErr(OutputStream)}
+	 * 
+	 * @since 1.0
+	 * @throws SshProxyJException
+	 */
+	public void open() throws SshProxyJException {
+		try {
+			this.channel.open();
+		} catch (Exception e) {
+			throw new SshProxyJException("Failed to open channel", e);
+		}
 	}
 
 	public void setIn(InputStream in) {
