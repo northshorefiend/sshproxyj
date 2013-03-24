@@ -27,7 +27,8 @@ public class RSAPublicKeyFromString implements RSAPublicKey {
 	RSAPublicKey delegate;
 
 	public RSAPublicKeyFromString(String key) throws SshProxyJException {
-		delegate = (RSAPublicKey) PublicKeyRead.decodePublicKey(key);
+		PublicKeyRead pkr = new PublicKeyRead();
+		delegate = (RSAPublicKey) pkr.decodePublicKey(key);
 	}
 	
 	/**

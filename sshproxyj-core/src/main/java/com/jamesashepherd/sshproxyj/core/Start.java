@@ -33,7 +33,7 @@ public class Start implements ConfigurableStartable {
 	final Logger logger = LoggerFactory.getLogger(Start.class);
 	private static File home;
 	private static Properties props;
-	private AbstractApplicationContext context;
+	private static AbstractApplicationContext context;
 
 	@Override
 	public void startup() throws StartException {
@@ -75,7 +75,7 @@ public class Start implements ConfigurableStartable {
 		return props;
 	}
 
-	public ApplicationContext getApplicationContext() {
+	public static ApplicationContext getApplicationContext() {
 		return context;
 	}
 }

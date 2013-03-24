@@ -41,7 +41,7 @@ public class SingleUserPublicKeyAuthenticator implements PublickeyAuthenticator 
 			ServerSession session) {
 		try {
 			return username.equals(this.username)
-					&& KeyUtils.haveSameModulus(key, publickey);
+					&& KeyUtils.isSame(key, publickey);
 		} catch (SshProxyJException e) {
 			e.printStackTrace();
 		}

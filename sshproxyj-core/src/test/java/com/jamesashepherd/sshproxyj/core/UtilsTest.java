@@ -27,6 +27,11 @@ public class UtilsTest {
 		InputStream is = UtilsTest.class.getResourceAsStream("id_rsa.pub");
 		return IOUtils.toString(is);
 	}
+	
+	static public String testPrivateKey() throws IOException {
+		InputStream is = UtilsTest.class.getResourceAsStream("id_rsa");
+		return IOUtils.toString(is);
+	}
 }
 
 
