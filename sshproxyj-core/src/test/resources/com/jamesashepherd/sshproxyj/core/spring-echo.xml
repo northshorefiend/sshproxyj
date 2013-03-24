@@ -46,6 +46,5 @@
 		<property name="sshClient" ref="sshClient" />
 		<property name="sshServer" ref="sshServer" />
 		<property name="clientSessions" ref="clientSessions" />
-		<property name="connectTimeoutSeconds" value="#{ props['client.connect.timeout.seconds'] }" />
 	</bean>
 </beans>

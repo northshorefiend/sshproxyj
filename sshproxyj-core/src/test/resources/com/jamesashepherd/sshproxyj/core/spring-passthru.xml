@@ -23,7 +23,6 @@
 	<bean id="commandFactory" class="com.jamesashepherd.sshproxyj.core.ProxyCommandFactory">
 		<property name="sshClient" ref="sshClient" />
 		<property name="clientSessions" ref="clientSessions" />
-		<property name="connectTimeoutSeconds" value="#{ props['client.connect.timeout.seconds'] }" />
 		<property name="remoteUserCredentialsService" ref="remoteUserCredentialsService" />
 	</bean>
 
@@ -48,6 +47,5 @@
 		<property name="sshClient" ref="sshClient" />
 		<property name="sshServer" ref="sshServer" />
 		<property name="clientSessions" ref="clientSessions" />
-		<property name="connectTimeoutSeconds" value="#{ props['client.connect.timeout.seconds'] }" />
 	</bean>
 </beans>

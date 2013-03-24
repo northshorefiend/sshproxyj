@@ -38,7 +38,6 @@ public class ProxyCommand implements Command {
 	private RemoteUserCredentialsService credentialsService;
 	private ClientSession session;
 	private List<ClientSession> clientSessions;
-	private int connectTimeout;
 	private ClientChannel channel;
 
 	public ProxyCommand(String command) {
@@ -192,14 +191,6 @@ public class ProxyCommand implements Command {
 
 	public void setClientSessions(List<ClientSession> clientSessions) {
 		this.clientSessions = clientSessions;
-	}
-
-	public int getConnectTimeoutSeconds() {
-		return connectTimeout;
-	}
-
-	public void setConnectTimeoutSeconds(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
 	}
 
 	public RemoteUserCredentialsService getRemoteUserCredentialsService() {

@@ -26,7 +26,6 @@ public class ProxyCommandFactory implements CommandFactory {
 	final Logger logger = LoggerFactory.getLogger(ProxyCommandFactory.class);
 	private SshClient client;
 	private List<ClientSession> clientSessions;
-	private int connectTimeout;
 	private RemoteUserCredentialsService credentialsService;
 
 	/*
@@ -40,7 +39,6 @@ public class ProxyCommandFactory implements CommandFactory {
 		ProxyCommand c = new ProxyCommand(command);
 		c.setSshClient(getSshClient());
 		c.setClientSessions(getClientSessions());
-		c.setConnectTimeoutSeconds(getConnectTimeoutSeconds());
 		c.setRemoteUserCredentialsService(getRemoteUserCredentialsService());
 		return c;
 	}
@@ -59,14 +57,6 @@ public class ProxyCommandFactory implements CommandFactory {
 
 	public void setClientSessions(List<ClientSession> clientSessions) {
 		this.clientSessions = clientSessions;
-	}
-
-	public int getConnectTimeoutSeconds() {
-		return connectTimeout;
-	}
-
-	public void setConnectTimeoutSeconds(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
 	}
 
 	public RemoteUserCredentialsService getRemoteUserCredentialsService() {
