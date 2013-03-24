@@ -160,7 +160,7 @@ public class ProxyCommand implements Command {
 			}
 			return;
 		}
-		logger.info("Denied username '{}'", username);
+		logger.info("Denied username '{}' command '{}'", username, command);
 		exitCallback.onExit(1, "You shall not pass");
 	}
 
