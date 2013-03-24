@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.beans.BeansException;
 
 import com.jamesashepherd.sshproxyj.SshProxyJException;
+import com.jamesashepherd.sshproxyj.utils.KeyUtils;
 import com.jamesashepherd.start.StartException;
 
 /**

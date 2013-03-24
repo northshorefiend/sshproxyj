@@ -23,7 +23,7 @@
 		factory-method="testPublicKey" />
 
 	<bean id="testUserPublicKey"
-		class="com.jamesashepherd.sshproxyj.core.RSAPublicKeyFromString">
+		class="com.jamesashepherd.sshproxyj.utils.RSAPublicKeyFromString">
 		<constructor-arg ref="testPublicKey" />
 	</bean>
 

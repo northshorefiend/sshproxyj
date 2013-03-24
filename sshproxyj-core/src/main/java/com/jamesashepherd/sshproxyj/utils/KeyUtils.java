@@ -4,7 +4,7 @@
  *
  * LICENCE: http://www.gnu.org/licenses/lgpl.html
  */
-package com.jamesashepherd.sshproxyj.core;
+package com.jamesashepherd.sshproxyj.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
