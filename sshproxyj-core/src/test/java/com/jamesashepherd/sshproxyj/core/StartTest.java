@@ -15,12 +15,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -67,13 +69,22 @@ public class StartTest {
 		}
 	}
 
+	private static KeyPair keyPair;
+
+	private static KeyPair keyPair2;
+
 	private List<File> toDelete;
 	private File home;
 
 	@BeforeClass
-	static public void setLogging() {
+	static public void setLogging() throws SshProxyJException, IOException {
+		Security.addProvider(new BouncyCastleProvider());
 		System.setProperty("org.slf4j.simpleLogger.log.com.jamesashepherd",
 				"debug");
+		keyPair = KeyUtils.makeKeyPair(UtilsTest.testPublicKey(),
+				UtilsTest.testPrivateKey());
+		keyPair2 = KeyUtils.makeKeyPair(UtilsTest.test2PublicKey(),
+				UtilsTest.test2PrivateKey());
 	}
 
 	@Before
@@ -88,20 +99,17 @@ public class StartTest {
 		confDir.mkdir();
 		toDelete.add(confDir);
 
-		File conf = new File(confDir, "spring.xml");
-		FileOutputStream fos = new FileOutputStream(conf);
-		InputStream is = getClass().getResourceAsStream("spring.xml");
-		IOUtils.copy(is, fos);
-		toDelete.add(conf);
-
-		conf = new File(confDir, "spring-echo.xml");
-		fos = new FileOutputStream(conf);
-		is = getClass().getResourceAsStream("spring-echo.xml");
-		IOUtils.copy(is, fos);
-		toDelete.add(conf);
+		for (String file : new String[] { "spring.xml", "spring-echo.xml",
+				"spring-passthru.xml" }) {
+			File conf = new File(confDir, file);
+			FileOutputStream fos = new FileOutputStream(conf);
+			InputStream is = getClass().getResourceAsStream(file);
+			IOUtils.copy(is, fos);
+			toDelete.add(conf);
+		}
 	}
 
-	@Test(timeout=30000)
+	@Test(timeout = 30000)
 	public void springStartup() throws StartException {
 		Properties p = new Properties();
 		p.setProperty(Start.SPRING_XML_PROPERTY, "conf/spring.xml");
@@ -114,7 +122,7 @@ public class StartTest {
 		s.shutdown();
 	}
 
-	@Test(timeout=30000)
+	@Test(timeout = 30000)
 	public void testEcho() throws StartException, IOException, BeansException,
 			NumberFormatException, SshProxyJException, InterruptedException {
 		Properties p = new Properties();
@@ -123,9 +131,6 @@ public class StartTest {
 		s.setHome(home);
 		s.setProperties(p);
 		s.startup();
-
-		KeyPair keyPair = KeyUtils.makeKeyPair(UtilsTest.testPublicKey(),
-				UtilsTest.testPrivateKey());
 
 		SshShell shell = s
 				.getApplicationContext()
@@ -152,24 +157,87 @@ public class StartTest {
 		s.shutdown();
 	}
 
-	@Test(timeout=30000,expected=SshProxyJException.class)
-	public void testEchoFail() throws IOException, SshProxyJException, StartException {
+	@Test(timeout = 30000, expected = SshProxyJException.class)
+	public void testEchoFail() throws IOException, SshProxyJException,
+			StartException {
+		Start s = null;
+		SshShell shell = null;
+		try {
+			Properties p = new Properties();
+			p.load(getClass().getResourceAsStream("echo.properties"));
+			s = new Start();
+			s.setHome(home);
+			s.setProperties(p);
+			s.startup();
+
+			shell = s
+					.getApplicationContext()
+					.getBean("sshProxyJServer", SshProxyJServer.class)
+					.getSshShell(
+							"localhost",
+							Integer.parseInt(p.getProperty("server.sshd.port")),
+							"testuser", keyPair2);
+		} finally {
+			if (shell != null)
+				shell.close();
+			if (s != null)
+				s.shutdown();
+		}
+	}
+
+	@Test
+	public void passThru() throws IOException, StartException {
 		Properties p = new Properties();
-		p.load(getClass().getResourceAsStream("echo.properties"));
+		p.load(getClass().getResourceAsStream("passthru.properties"));
 		Start s = new Start();
 		s.setHome(home);
 		s.setProperties(p);
 		s.startup();
 
-		KeyPair keyPair2 = KeyUtils.makeKeyPair(UtilsTest.test2PublicKey(),
-				UtilsTest.test2PrivateKey());
+		MemoryUserPublicKeyService userService = s.getApplicationContext()
+				.getBean("userPublicKeyService",
+						MemoryUserPublicKeyService.class);
 
-		SshShell shell = s
-				.getApplicationContext()
-				.getBean("sshProxyJServer", SshProxyJServer.class)
-				.getSshShell("localhost",
-						Integer.parseInt(p.getProperty("server.sshd.port")),
-						"testuser", keyPair2);
+		userService.addUser("testuser", keyPair.getPublic());
+
+		MemoryRemoteUserCredentialsService credentialsService = s
+				.getApplicationContext().getBean(
+						"remoteUserCredentialsService",
+						MemoryRemoteUserCredentialsService.class);
+		credentialsService.addCredentials("testuser", "root@localhost:4321", new ProxyCredentials() {
+			
+			@Override
+			public String getUsername() {
+				return "testuser";
+			}
+			
+			@Override
+			public String getRemoteUsername() {
+				return "root";
+			}
+			
+			@Override
+			public int getRemotePort() {
+				return 4321;
+			}
+			
+			@Override
+			public String getRemoteHost() {
+				return "localhost";
+			}
+			
+			@Override
+			public KeyPair getKeyPair() {
+				return keyPair2;
+			}
+			
+			@Override
+			public String getCommand() {
+				return "root@localhost:4321";
+			}
+		});
+		
+		s.shutdown();
 	}
 
 	@After

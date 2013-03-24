@@ -94,11 +94,9 @@ public class SshProxyJServer implements Startable {
 
 	public SshShell getSshShell(String host, int port, String username,
 			KeyPair keyPair) throws SshProxyJException {
-		ClientSession session;
-		ClientChannel channel;
 		try {
-			session = getSshClient().connect(host, port).await().getSession();
-			getClientSessions().add(session);
+			ClientSession session = getSshClient().connect(host, port).await()
+					.getSession();
 			session.authPublicKey(username, keyPair);
 
 			int ret = session.waitFor(ClientSession.CLOSED
@@ -112,15 +110,16 @@ public class SshProxyJServer implements Startable {
 			if ((ret & ClientSession.AUTHED) == 0)
 				throw new SshProxyJException("Failed to authenticate: "
 						+ username + "@" + host + ":" + port);
-			
-			channel = session.createChannel("shell");
+
+			ClientChannel channel = session.createChannel("shell");
+			getClientSessions().add(session);
+			return new SshShell(session, channel, getClientSessions());
 		} catch (InterruptedException e) {
 			throw new SshProxyJException("Failed to start session", e);
 		} catch (Exception e) {
 			throw new SshProxyJException("Failed to start session", e);
 		}
 
-		return new SshShell(session, channel, getClientSessions());
 	}
 
 	public int getConnectTimeoutSeconds() {

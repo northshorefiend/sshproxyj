@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<import resource="spring.xml" />
+
+	<bean id="clientSessions" class="java.util.concurrent.CopyOnWriteArrayList" />
+
+	<bean id="sshClient" class="org.apache.sshd.SshClient"
+		factory-method="setUpDefaultClient" />
+
+	<bean id="hostKeyPairProvider"
+		class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
+		<constructor-arg
+			value="#{ home.absolutePath + '/' + props['host.key.file'] }" />
+	</bean>
+
+	<bean id="remoteUserCredentialsService"
+		class="com.jamesashepherd.sshproxyj.core.MemoryRemoteUserCredentialsService" />
+
+	<bean id="commandFactory" class="com.jamesashepherd.sshproxyj.core.ProxyCommandFactory">
+		<property name="sshClient" ref="sshClient" />
+		<property name="clientSessions" ref="clientSessions" />
+		<property name="connectTimeoutSeconds" value="#{ props['client.connect.timeout.seconds'] }" />
+		<property name="remoteUserCredentialsService" ref="remoteUserCredentialsService" />
+	</bean>
+
+	<bean id="userPublicKeyService"
+		class="com.jamesashepherd.sshproxyj.core.MemoryUserPublicKeyService" />
+
+	<bean id="publickeyAuthenticator"
+		class="com.jamesashepherd.sshproxyj.core.UserPublicKeyAuthenticator">
+		<property name="userPublicKeyService" ref="userPublicKeyService" />
+	</bean>
+
+	<bean id="sshServer" class="org.apache.sshd.SshServer"
+		factory-method="setUpDefaultServer">
+		<property name="port" value="#{ props['server.sshd.port'] }" />
+		<property name="keyPairProvider" ref="hostKeyPairProvider" />
+		<property name="commandFactory" ref="commandFactory" />
+		<property name="publickeyAuthenticator" ref="publickeyAuthenticator" />
+	</bean>
+
+	<bean id="sshProxyJServer" class="com.jamesashepherd.sshproxyj.core.SshProxyJServer"
+		init-method="startup" destroy-method="shutdown">
+		<property name="sshClient" ref="sshClient" />
+		<property name="sshServer" ref="sshServer" />
+		<property name="clientSessions" ref="clientSessions" />
+		<property name="connectTimeoutSeconds" value="#{ props['client.connect.timeout.seconds'] }" />
+	</bean>
+</beans>

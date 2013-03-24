@@ -107,7 +107,7 @@ public class CommandEcho implements Command {
 							break;
 						}
 
-						logger.debug("Echoing: " + line);
+						logger.debug("Echoing: {}", line);
 						bw.write(line);
 						bw.write('\n');
 						bw.flush();
