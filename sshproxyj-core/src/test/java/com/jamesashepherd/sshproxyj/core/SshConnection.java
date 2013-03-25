@@ -8,7 +8,6 @@ package com.jamesashepherd.sshproxyj.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
@@ -24,17 +23,15 @@ import com.jamesashepherd.sshproxyj.SshProxyJException;
  * @author James A. Shepherd
  * @since 1.0
  */
-public class SshShell {
-	final Logger logger = LoggerFactory.getLogger(SshShell.class);
+public class SshConnection {
+	final Logger logger = LoggerFactory.getLogger(SshConnection.class);
 	private ClientSession session;
 	private ClientChannel channel;
-	private List<ClientSession> clientSessions;
 
-	public SshShell(ClientSession session, ClientChannel channel,
-			List<ClientSession> clientSessions) throws SshProxyJException {
+	public SshConnection(ClientSession session, ClientChannel channel)
+			throws SshProxyJException {
 		this.session = session;
 		this.channel = channel;
-		this.clientSessions = clientSessions;
 	}
 
 	/**
@@ -47,6 +44,14 @@ public class SshShell {
 	public void open() throws SshProxyJException {
 		try {
 			this.channel.open();
+			new Thread(new Runnable() {
+
+				public void run() {
+					channel.waitFor(ClientChannel.CLOSED, 0);
+					close();
+				}
+
+			}).start();
 		} catch (Exception e) {
 			throw new SshProxyJException("Failed to open channel", e);
 		}
@@ -67,7 +72,6 @@ public class SshShell {
 	public void close() {
 		this.channel.close(false);
 		this.session.close(false);
-		this.clientSessions.remove(session);
 	}
 
 }

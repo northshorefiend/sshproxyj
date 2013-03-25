@@ -110,8 +110,7 @@ public class ProxyCommand implements Command {
 				if (session
 						.authPublicKey(pc.getRemoteUsername(), pc.getKeyPair())
 						.await().isFailure()) {
-					logger.info(
-							"Immediately failed to authenticate {}@{}:{} for {}",
+					logger.info("Failed to authenticate {}@{}:{} for {}",
 							pc.getRemoteUsername(), pc.getRemoteHost(),
 							pc.getRemotePort(), pc.getUsername());
 					throw new IOException("Failed to authenticate: "

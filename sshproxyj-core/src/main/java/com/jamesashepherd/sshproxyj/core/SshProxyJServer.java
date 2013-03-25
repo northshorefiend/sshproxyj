@@ -7,17 +7,14 @@
 package com.jamesashepherd.sshproxyj.core;
 
 import java.io.IOException;
-import java.security.KeyPair;
 import java.util.List;
 
-import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.SshServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jamesashepherd.sshproxyj.SshProxyJException;
 import com.jamesashepherd.start.StartException;
 import com.jamesashepherd.start.Startable;
 
@@ -89,38 +86,5 @@ public class SshProxyJServer implements Startable {
 
 	public void setClientSessions(List<ClientSession> clientSessions) {
 		this.clientSessions = clientSessions;
-	}
-
-	/**
-	 * 
-	 * @since 1.0
-	 * @param host
-	 * @param port
-	 * @param username
-	 * @param keyPair
-	 * @param command shell for a shell, other for sending a command
-	 * @return
-	 * @throws SshProxyJException
-	 */
-	public SshShell getSshShell(String host, int port, String username,
-			KeyPair keyPair, String command) throws SshProxyJException {
-		try {
-			ClientSession session = getSshClient().connect(host, port).await()
-					.getSession();
-			if(session.authPublicKey(username, keyPair).await().isFailure()) {
-				throw new SshProxyJException("Immediately failed to authenticate: "
-						+ username + "@" + host + ":" + port);
-			}
-
-			ClientChannel channel = command.equals("shell") ? session
-					.createChannel("shell") : session
-					.createExecChannel(command);
-			getClientSessions().add(session);
-			return new SshShell(session, channel, getClientSessions());
-		} catch (InterruptedException e) {
-			throw new SshProxyJException("Failed to start session", e);
-		} catch (Exception e) {
-			throw new SshProxyJException("Failed to start session", e);
-		}
 	}
 }
