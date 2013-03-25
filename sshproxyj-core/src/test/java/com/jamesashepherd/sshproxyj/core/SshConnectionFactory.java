@@ -45,7 +45,7 @@ public class SshConnectionFactory implements Startable {
 	 * @return
 	 * @throws SshProxyJException
 	 */
-	public SshConnection getSshShell(String host, int port, String username,
+	public SshConnection getSshConnection(String host, int port, String username,
 			KeyPair keyPair, String command) throws SshProxyJException {
 		try {
 			ClientSession session = client.connect(host, port).await()

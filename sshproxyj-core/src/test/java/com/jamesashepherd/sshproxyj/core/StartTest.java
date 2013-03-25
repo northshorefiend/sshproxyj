@@ -130,7 +130,7 @@ public class StartTest {
 
 		SshConnectionFactory scf = new SshConnectionFactory();
 		scf.startup();
-		SshConnection shell = scf.getSshShell("localhost",
+		SshConnection shell = scf.getSshConnection("localhost",
 				Integer.parseInt(p.getProperty("server.sshd.port")),
 				"testuser", keyPair, "shell");
 
@@ -186,7 +186,7 @@ public class StartTest {
 
 			scf = new SshConnectionFactory();
 			scf.startup();
-			shell = scf.getSshShell("localhost",
+			shell = scf.getSshConnection("localhost",
 					Integer.parseInt(p.getProperty("server.sshd.port")),
 					"testuser", keyPair2, "shell");
 		} finally {
@@ -264,7 +264,7 @@ public class StartTest {
 
 		SshConnectionFactory scf = new SshConnectionFactory();
 		scf.startup();
-		SshConnection shell = scf.getSshShell("localhost",
+		SshConnection shell = scf.getSshConnection("localhost",
 				Integer.parseInt(p.getProperty("server.sshd.port")),
 				"testuser", keyPair2, "testuser@localhost:6667");
 
