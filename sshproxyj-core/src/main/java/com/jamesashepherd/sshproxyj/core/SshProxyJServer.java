@@ -33,7 +33,6 @@ public class SshProxyJServer implements Startable {
 	private SshClient client;
 	private SshServer sshd;
 	private List<ClientSession> clientSessions;
-	private int connectTimeout;
 
 	/*
 	 * (non-Javadoc)
@@ -123,14 +122,5 @@ public class SshProxyJServer implements Startable {
 		} catch (Exception e) {
 			throw new SshProxyJException("Failed to start session", e);
 		}
-
-	}
-
-	public int getConnectTimeoutSeconds() {
-		return connectTimeout;
-	}
-
-	public void setConnectTimeoutSeconds(int connectTimeout) {
-		this.connectTimeout = connectTimeout;
 	}
 }
