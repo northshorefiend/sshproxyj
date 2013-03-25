@@ -7,9 +7,8 @@
 package com.jamesashepherd.sshproxyj.core;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
-import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.SshServer;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class SshProxyJServer implements Startable {
 	final Logger logger = LoggerFactory.getLogger(SshProxyJServer.class);
 	private SshClient client;
 	private SshServer sshd;
-	private List<ClientSession> clientSessions;
+	private Set<ProxySession> proxySessions;
 
 	/*
 	 * (non-Javadoc)
@@ -54,8 +53,9 @@ public class SshProxyJServer implements Startable {
 	@Override
 	public void shutdown() throws StartException {
 		try {
-			for (ClientSession session : getClientSessions()) {
-				session.close(false);
+			for (ProxySession session : getProxySessions()) {
+				if (session.getClientSession() != null)
+					session.getClientSession().close(false);
 			}
 			getSshClient().stop();
 			getSshServer().stop();
@@ -80,11 +80,11 @@ public class SshProxyJServer implements Startable {
 		this.sshd = sshd;
 	}
 
-	public List<ClientSession> getClientSessions() {
-		return clientSessions;
+	public Set<ProxySession> getProxySessions() {
+		return proxySessions;
 	}
 
-	public void setClientSessions(List<ClientSession> clientSessions) {
-		this.clientSessions = clientSessions;
+	public void setProxySessions(Set<ProxySession> proxySessions) {
+		this.proxySessions = proxySessions;
 	}
 }

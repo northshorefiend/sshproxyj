@@ -9,10 +9,9 @@ package com.jamesashepherd.sshproxyj.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -36,12 +35,12 @@ public class ProxyCommand implements Command {
 	private OutputStream err;
 	private ExitCallback exitCallback;
 	private RemoteUserCredentialsService credentialsService;
-	private ClientSession session;
-	private List<ClientSession> clientSessions;
-	private ClientChannel channel;
+	private ProxySession proxySession;
+	private Set<ProxySession> proxySessions;
 
 	public ProxyCommand(String command) {
 		this.command = command;
+		this.proxySession = new ProxySession();
 	}
 
 	/*
@@ -99,15 +98,17 @@ public class ProxyCommand implements Command {
 		ProxyCredentials pc = getRemoteUserCredentialsService()
 				.lookupUserCommand(username, command);
 
+		proxySession.setProxyCredentials(pc);
+		
 		if (pc != null) {
 			try {
-				session = client
+				proxySession.setClientSession(client
 						.connect(pc.getRemoteHost(), pc.getRemotePort())
-						.await().getSession();
+						.await().getSession());
 				logger.info("Started Remote Session {}@{}:{} for {}",
 						pc.getRemoteUsername(), pc.getRemoteHost(),
 						pc.getRemotePort(), pc.getUsername());
-				if (session
+				if (proxySession.getClientSession()
 						.authPublicKey(pc.getRemoteUsername(), pc.getKeyPair())
 						.await().isFailure()) {
 					logger.info("Failed to authenticate {}@{}:{} for {}",
@@ -121,20 +122,24 @@ public class ProxyCommand implements Command {
 
 				logger.debug("KeyPair Accepted");
 
-				getClientSessions().add(session);
-				channel = session.createChannel("shell");
-				channel.setIn(in);
-				channel.setOut(out);
-				channel.setErr(out);
-				channel.open();
+				proxySessions.add(proxySession);
+
+				proxySession.setClientChannel(proxySession.getClientSession()
+						.createChannel("shell"));
+				proxySession.getClientChannel().setIn(in);
+				proxySession.getClientChannel().setOut(out);
+				proxySession.getClientChannel().setErr(out);
+				proxySession.getClientChannel().open();
 				new Thread(new Runnable() {
 
 					public void run() {
-						channel.waitFor(ClientChannel.CLOSED, 0);
-						exitCallback.onExit(channel.getExitStatus() == null ? 1
-								: channel.getExitStatus());
-						session.close(false);
-						getClientSessions().remove(session);
+						proxySession.getClientChannel().waitFor(
+								ClientChannel.CLOSED, 0);
+						exitCallback.onExit(proxySession.getClientChannel()
+								.getExitStatus() == null ? 1 : proxySession
+								.getClientChannel().getExitStatus());
+						proxySession.getClientSession().close(false);
+						proxySessions.remove(proxySession);
 					}
 
 				}).start();
@@ -170,10 +175,10 @@ public class ProxyCommand implements Command {
 	 */
 	@Override
 	public void destroy() {
-		if (channel != null)
-			channel.close(true);
-		if (session != null)
-			session.close(true);
+		if (proxySession.getClientChannel() != null)
+			proxySession.getClientChannel().close(true);
+		if (proxySession.getClientSession() != null)
+			proxySession.getClientSession().close(true);
 	}
 
 	public SshClient getSshClient() {
@@ -184,14 +189,6 @@ public class ProxyCommand implements Command {
 		this.client = client;
 	}
 
-	public List<ClientSession> getClientSessions() {
-		return clientSessions;
-	}
-
-	public void setClientSessions(List<ClientSession> clientSessions) {
-		this.clientSessions = clientSessions;
-	}
-
 	public RemoteUserCredentialsService getRemoteUserCredentialsService() {
 		return credentialsService;
 	}
@@ -199,5 +196,17 @@ public class ProxyCommand implements Command {
 	public void setRemoteUserCredentialsService(
 			RemoteUserCredentialsService credentialsService) {
 		this.credentialsService = credentialsService;
+	}
+
+	public ProxySession getProxySession() {
+		return proxySession;
+	}
+
+	public Set<ProxySession> getProxySessions() {
+		return proxySessions;
+	}
+
+	public void setProxySessions(Set<ProxySession> proxySessions) {
+		this.proxySessions = proxySessions;
 	}
 }

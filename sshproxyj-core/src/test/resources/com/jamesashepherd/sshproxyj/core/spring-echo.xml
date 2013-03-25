@@ -6,7 +6,7 @@
 
 	<import resource="spring.xml" />
 
-	<bean id="clientSessions" class="java.util.concurrent.CopyOnWriteArrayList" />
+	<bean id="proxySessions" class="java.util.concurrent.CopyOnWriteArraySet" />
 
 	<bean id="sshClient" class="org.apache.sshd.SshClient"
 		factory-method="setUpDefaultClient" />
@@ -45,6 +45,6 @@
 		init-method="startup" destroy-method="shutdown">
 		<property name="sshClient" ref="sshClient" />
 		<property name="sshServer" ref="sshServer" />
-		<property name="clientSessions" ref="clientSessions" />
+		<property name="proxySessions" ref="proxySessions" />
 	</bean>
 </beans>

@@ -25,6 +25,7 @@ public class ProxySession {
 	private ClientSession session;
 	private ClientChannel channel;
 	private ProxyCredentials credentials;
+	private CommandLogger commandLogger;
 	
 	public ClientSession getClientSession() {
 		return session;
@@ -48,5 +49,13 @@ public class ProxySession {
 
 	public void setProxyCredentials(ProxyCredentials credentials) {
 		this.credentials = credentials;
+	}
+
+	public CommandLogger getCommandLogger() {
+		return commandLogger;
+	}
+
+	public void setCommandLogger(CommandLogger commandLogger) {
+		this.commandLogger = commandLogger;
 	}
 }

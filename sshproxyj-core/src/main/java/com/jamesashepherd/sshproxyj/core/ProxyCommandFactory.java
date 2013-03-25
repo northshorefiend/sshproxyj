@@ -6,9 +6,8 @@
  */
 package com.jamesashepherd.sshproxyj.core;
 
-import java.util.List;
+import java.util.Set;
 
-import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
@@ -25,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class ProxyCommandFactory implements CommandFactory {
 	final Logger logger = LoggerFactory.getLogger(ProxyCommandFactory.class);
 	private SshClient client;
-	private List<ClientSession> clientSessions;
+	private Set<ProxySession> proxySessions;
 	private RemoteUserCredentialsService credentialsService;
 
 	/*
@@ -38,7 +37,7 @@ public class ProxyCommandFactory implements CommandFactory {
 	public Command createCommand(String command) {
 		ProxyCommand c = new ProxyCommand(command);
 		c.setSshClient(getSshClient());
-		c.setClientSessions(getClientSessions());
+		c.setProxySessions(getProxySessions());
 		c.setRemoteUserCredentialsService(getRemoteUserCredentialsService());
 		return c;
 	}
@@ -51,12 +50,12 @@ public class ProxyCommandFactory implements CommandFactory {
 		this.client = client;
 	}
 
-	public List<ClientSession> getClientSessions() {
-		return clientSessions;
+	public Set<ProxySession> getProxySessions() {
+		return proxySessions;
 	}
 
-	public void setClientSessions(List<ClientSession> clientSessions) {
-		this.clientSessions = clientSessions;
+	public void setProxySessions(Set<ProxySession> proxySessions) {
+		this.proxySessions = proxySessions;
 	}
 
 	public RemoteUserCredentialsService getRemoteUserCredentialsService() {
