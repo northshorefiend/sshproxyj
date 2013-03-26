@@ -37,6 +37,7 @@ public class ProxyCommand implements Command {
 	private RemoteUserCredentialsService credentialsService;
 	private ProxySession proxySession;
 	private Set<ProxySession> proxySessions;
+	private LoggingInputStream loggingInputStream;
 
 	public ProxyCommand(String command) {
 		this.command = command;
@@ -126,7 +127,8 @@ public class ProxyCommand implements Command {
 
 				proxySession.setClientChannel(proxySession.getClientSession()
 						.createChannel("shell"));
-				proxySession.getClientChannel().setIn(in);
+				loggingInputStream = new LoggingInputStream(in);
+				proxySession.getClientChannel().setIn(loggingInputStream);
 				proxySession.getClientChannel().setOut(out);
 				proxySession.getClientChannel().setErr(out);
 				proxySession.getClientChannel().open();

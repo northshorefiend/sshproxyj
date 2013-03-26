@@ -14,7 +14,7 @@ package com.jamesashepherd.sshproxyj.core;
  * @since 1.0
  */
 public interface CommandLogger {
-	void log(String s);
+	void log(byte[] bytes);
 	
 	void logStart();
 	
