@@ -38,6 +38,7 @@ public class ProxyCommand implements Command {
 	private ProxySession proxySession;
 	private Set<ProxySession> proxySessions;
 	private LoggingInputStream loggingInputStream;
+	private CommandLoggerFactory loggerFactory;
 
 	public ProxyCommand(String command) {
 		this.command = command;
@@ -100,7 +101,7 @@ public class ProxyCommand implements Command {
 				.lookupUserCommand(username, command);
 
 		proxySession.setProxyCredentials(pc);
-		
+
 		if (pc != null) {
 			try {
 				proxySession.setClientSession(client
@@ -127,7 +128,9 @@ public class ProxyCommand implements Command {
 
 				proxySession.setClientChannel(proxySession.getClientSession()
 						.createChannel("shell"));
-				loggingInputStream = new LoggingInputStream(in);
+				loggingInputStream = new LoggingInputStream(in,
+						getCommandLoggerFactory().createCommandLogger(proxySession
+								.getProxyCredentials()));
 				proxySession.getClientChannel().setIn(loggingInputStream);
 				proxySession.getClientChannel().setOut(out);
 				proxySession.getClientChannel().setErr(out);
@@ -140,6 +143,11 @@ public class ProxyCommand implements Command {
 						exitCallback.onExit(proxySession.getClientChannel()
 								.getExitStatus() == null ? 1 : proxySession
 								.getClientChannel().getExitStatus());
+						try {
+							loggingInputStream.close();
+						} catch (IOException e) {
+							logger.info("Failed to close", e);
+						}
 						proxySession.getClientSession().close(false);
 						proxySessions.remove(proxySession);
 					}
@@ -177,6 +185,13 @@ public class ProxyCommand implements Command {
 	 */
 	@Override
 	public void destroy() {
+		if (loggingInputStream != null) {
+			try {
+				loggingInputStream.close();
+			} catch (IOException e) {
+				logger.info("Failed to close", e);
+			}
+		}
 		if (proxySession.getClientChannel() != null)
 			proxySession.getClientChannel().close(true);
 		if (proxySession.getClientSession() != null)
@@ -210,5 +225,13 @@ public class ProxyCommand implements Command {
 
 	public void setProxySessions(Set<ProxySession> proxySessions) {
 		this.proxySessions = proxySessions;
+	}
+
+	public CommandLoggerFactory getCommandLoggerFactory() {
+		return loggerFactory;
+	}
+
+	public void setCommandLoggerFactory(CommandLoggerFactory loggerFactory) {
+		this.loggerFactory = loggerFactory;
 	}
 }

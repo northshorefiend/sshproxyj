@@ -26,6 +26,7 @@ public class ProxyCommandFactory implements CommandFactory {
 	private SshClient client;
 	private Set<ProxySession> proxySessions;
 	private RemoteUserCredentialsService credentialsService;
+	private CommandLoggerFactory loggerFactory;
 
 	/*
 	 * (non-Javadoc)
@@ -39,6 +40,7 @@ public class ProxyCommandFactory implements CommandFactory {
 		c.setSshClient(getSshClient());
 		c.setProxySessions(getProxySessions());
 		c.setRemoteUserCredentialsService(getRemoteUserCredentialsService());
+		c.setCommandLoggerFactory(getCommandLoggerFactory());
 		return c;
 	}
 
@@ -64,5 +66,13 @@ public class ProxyCommandFactory implements CommandFactory {
 
 	public void setRemoteUserCredentialsService(RemoteUserCredentialsService credentialsService) {
 		this.credentialsService = credentialsService;
+	}
+
+	public CommandLoggerFactory getCommandLoggerFactory() {
+		return loggerFactory;
+	}
+
+	public void setCommandLoggerFactory(CommandLoggerFactory loggerFactory) {
+		this.loggerFactory = loggerFactory;
 	}
 }

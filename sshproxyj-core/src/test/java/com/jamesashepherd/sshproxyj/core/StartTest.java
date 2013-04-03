@@ -7,6 +7,7 @@
 package com.jamesashepherd.sshproxyj.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -48,7 +49,7 @@ public class StartTest {
 
 		@Override
 		public void write(int arg0) throws IOException {
-			String s = new String(new byte[] { (byte) arg0 });
+			String s = new String(new byte[] { (byte) arg0 }, "UTF-8");
 			sb.append(s);
 		}
 	}
@@ -211,7 +212,8 @@ public class StartTest {
 		s.setProperties(p);
 		s.startup();
 
-		System.err.println("Started server");
+		MemoryCommandLoggerFactory mclf = s.getApplicationContext().getBean(
+				"commandLoggerFactory", MemoryCommandLoggerFactory.class);
 
 		MemoryUserPublicKeyService userService = s.getApplicationContext()
 				.getBean("userPublicKeyService",
@@ -283,6 +285,8 @@ public class StartTest {
 		scf.shutdown();
 
 		assertEquals(command, sb.toString());
+
+		assertArrayEquals(new String[] {"--STARTING--", "alrkuhliuhaerg", "--ENDING--"}, mclf.getLastLog().toArray(new String[0]));
 
 		echo.shutdown();
 		s.shutdown();

@@ -20,10 +20,14 @@
 	<bean id="remoteUserCredentialsService"
 		class="com.jamesashepherd.sshproxyj.core.MemoryRemoteUserCredentialsService" />
 
+	<bean id="commandLoggerFactory"
+		class="com.jamesashepherd.sshproxyj.core.MemoryCommandLoggerFactory" />
+
 	<bean id="commandFactory" class="com.jamesashepherd.sshproxyj.core.ProxyCommandFactory">
 		<property name="sshClient" ref="sshClient" />
 		<property name="proxySessions" ref="proxySessions" />
 		<property name="remoteUserCredentialsService" ref="remoteUserCredentialsService" />
+		<property name="commandLoggerFactory" ref="commandLoggerFactory" />
 	</bean>
 
 	<bean id="userPublicKeyService"
