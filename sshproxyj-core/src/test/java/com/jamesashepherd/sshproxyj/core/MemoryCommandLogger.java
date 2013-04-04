@@ -24,12 +24,15 @@ public class MemoryCommandLogger implements CommandLogger {
 	final Logger logger = LoggerFactory.getLogger(MemoryCommandLogger.class);
 	private ArrayList<String> buffers = new ArrayList<String>();
 	final private byte nl = (byte) '\n';
-	private StringBuilder buffer;
+	private byte[] buffer;
+	private int len = 0;
 	private MemoryCommandLoggerFactory factory;
 	private boolean hasEnded = false;
 
-	MemoryCommandLogger(MemoryCommandLoggerFactory factory) {
+	MemoryCommandLogger(MemoryCommandLoggerFactory factory, int bufferCapacity) {
 		this.factory = factory;
+		buffer = new byte[bufferCapacity];
+
 	}
 
 	/*
@@ -47,23 +50,26 @@ public class MemoryCommandLogger implements CommandLogger {
 			else {
 				if (end - off > 0) {
 					try {
-						buffers.add(buffer.toString()
-								+ new String(bytes, off, end + 1 - off, "UTF-8") + '\n');
+						buffers.add(new String(buffer, 0, len, "UTF-8")
+								+ new String(bytes, off, end + 1 - off, "UTF-8")
+								+ "\n");
+						logger.debug("LINE ENDED");
 					} catch (UnsupportedEncodingException e) {
 						logger.info("UTF-8", e);
 					}
 
 					off = i + 1;
-					buffer.delete(0, buffer.length());
+					len = 0;
+				} else {
+					buffers.add("\n");
 				}
 			}
 		}
-		if (end + 1 - off > 0) {
-			try {
-				buffer.append(new String(bytes, off, end + 1 - off, "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				logger.info("UTF-8", e);
-			}
+		int left = end + 1 - off;
+		if (left > 0) {
+			logger.debug("ADDING TO BUFFER: {}", left);
+			System.arraycopy(bytes, off, buffer, len, left);
+			len += left;
 		}
 	}
 
@@ -75,7 +81,6 @@ public class MemoryCommandLogger implements CommandLogger {
 	@Override
 	synchronized public void logStart() {
 		buffers.add("--STARTING--");
-		buffer = new StringBuilder();
 	}
 
 	/*
@@ -86,8 +91,13 @@ public class MemoryCommandLogger implements CommandLogger {
 	@Override
 	synchronized public void logEnd() {
 		if (!hasEnded) {
-			if (buffer.length() > 0)
-				buffers.add(buffer.toString());
+			if (len > 0) {
+				try {
+					buffers.add(new String(buffer, 0, len, "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					logger.info("UTF-8", e);
+				}
+			}
 			buffers.add("--ENDING--");
 			factory.setLastLog(buffers);
 			hasEnded = true;

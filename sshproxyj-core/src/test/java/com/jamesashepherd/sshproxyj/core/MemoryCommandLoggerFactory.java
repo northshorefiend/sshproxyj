@@ -28,7 +28,7 @@ public class MemoryCommandLoggerFactory implements CommandLoggerFactory {
 	 */
 	@Override
 	public CommandLogger createCommandLogger(ProxyCredentials pc) {
-		return new MemoryCommandLogger(this);
+		return new MemoryCommandLogger(this, 5);
 	}
 
 	public List<String> getLastLog() {
