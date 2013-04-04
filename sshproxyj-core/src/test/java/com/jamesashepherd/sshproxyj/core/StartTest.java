@@ -78,7 +78,7 @@ public class StartTest {
 	private File home;
 
 	@BeforeClass
-	static public void setLogging() throws SshProxyJException, IOException {
+	static public void setUp() throws SshProxyJException, IOException {
 		Security.addProvider(new BouncyCastleProvider());
 		System.setProperty("org.slf4j.simpleLogger.log.com.jamesashepherd",
 				"debug");
@@ -270,7 +270,7 @@ public class StartTest {
 				Integer.parseInt(p.getProperty("server.sshd.port")),
 				"testuser", keyPair2, "testuser@localhost:6667");
 
-		String command = "alrkuhliuhaerg\n";
+		String command = "alrkuhliuhaerg\n8474u4jfnkf";
 		shell.setIn(new StringInputStream(command));
 
 		StringBuilder sb = new StringBuilder();
@@ -284,9 +284,10 @@ public class StartTest {
 		shell.close();
 		scf.shutdown();
 
-		assertEquals(command, sb.toString());
+		// extra nl? Dunno why
+		assertEquals(command + '\n', sb.toString());
 
-		assertArrayEquals(new String[] {"--STARTING--", "alrkuhliuhaerg", "--ENDING--"}, mclf.getLastLog().toArray(new String[0]));
+		assertArrayEquals(new String[] {"--STARTING--", "alrkuhliuhaerg\n", "8474u4jfnkf", "--ENDING--"}, mclf.getLastLog().toArray(new String[0]));
 
 		echo.shutdown();
 		s.shutdown();

@@ -48,7 +48,7 @@ public class MemoryCommandLogger implements CommandLogger {
 				if (end - off > 0) {
 					try {
 						buffers.add(buffer.toString()
-								+ new String(bytes, off, end + 1 - off, "UTF-8"));
+								+ new String(bytes, off, end + 1 - off, "UTF-8") + '\n');
 					} catch (UnsupportedEncodingException e) {
 						logger.info("UTF-8", e);
 					}
