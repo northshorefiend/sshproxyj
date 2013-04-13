@@ -22,13 +22,14 @@ public class MemoryCommandLoggerFactory implements CommandLoggerFactory {
 	final Logger logger = LoggerFactory
 			.getLogger(MemoryCommandLoggerFactory.class);
 	private List<String> lastLog;
+	private int len;
 	
 	/* (non-Javadoc)
 	 * @see com.jamesashepherd.sshproxyj.core.CommandLoggerFactory#createCommandLogger(com.jamesashepherd.sshproxyj.core.ProxyCredentials)
 	 */
 	@Override
 	public CommandLogger createCommandLogger(ProxyCredentials pc) {
-		return new MemoryCommandLogger(this, 5);
+		return new MemoryCommandLogger(this, len);
 	}
 
 	public List<String> getLastLog() {
@@ -37,6 +38,11 @@ public class MemoryCommandLoggerFactory implements CommandLoggerFactory {
 
 	public void setLastLog(List<String> lastLog) {
 		this.lastLog = lastLog;
+	}
+
+	@Override
+	public void setBufferLength(int len) {
+		this.len = len;
 	}
 }
 

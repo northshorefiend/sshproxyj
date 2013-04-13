@@ -21,7 +21,9 @@
 		class="com.jamesashepherd.sshproxyj.core.MemoryRemoteUserCredentialsService" />
 
 	<bean id="commandLoggerFactory"
-		class="com.jamesashepherd.sshproxyj.core.MemoryCommandLoggerFactory" />
+		class="com.jamesashepherd.sshproxyj.core.MemoryCommandLoggerFactory">
+		<property name="bufferLength" value="5" />
+	</bean>
 
 	<bean id="commandFactory" class="com.jamesashepherd.sshproxyj.core.ProxyCommandFactory">
 		<property name="sshClient" ref="sshClient" />

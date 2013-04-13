@@ -40,12 +40,12 @@ public class LoggingInputStream extends InputStream {
 	public int read() throws IOException {
 		checkStarted();
 		int b = in.read();
-		
+
 		if (b == -1)
 			commandLogger.logEnd();
 		else
-			commandLogger.log(new byte[] { (byte) b });
-		
+			commandLogger.log(new byte[] { (byte) b }, 0, 1);
+
 		return b;
 	}
 
@@ -80,9 +80,7 @@ public class LoggingInputStream extends InputStream {
 		if (ret == -1)
 			commandLogger.logEnd();
 		else {
-			byte[] b1 = new byte[ret];
-			System.arraycopy(b, off, b1, 0, ret);
-			commandLogger.log(b1);
+			commandLogger.log(b, off, ret);
 		}
 
 		return ret;
@@ -94,12 +92,12 @@ public class LoggingInputStream extends InputStream {
 		commandLogger.logEnd();
 		in.close();
 	}
-	
+
 	public void checkStarted() {
-		if(!hasStarted) {
+		if (!hasStarted) {
 			commandLogger.logStart();
 			hasStarted = true;
 		}
-			
+
 	}
 }

@@ -16,4 +16,6 @@ package com.jamesashepherd.sshproxyj.core;
 public interface CommandLoggerFactory {
 
 	CommandLogger createCommandLogger(ProxyCredentials pc);
+	
+	void setBufferLength(int len);
 }

@@ -287,9 +287,10 @@ public class StartTest {
 		// extra nl? Dunno why
 		assertEquals(command + '\n', sb.toString());
 
-		assertArrayEquals(new String[] { "--STARTING--", "alrkuhliuhaerg\n",
-				"8474u4jfnkf", "--ENDING--" },
-				mclf.getLastLog().toArray(new String[0]));
+		String[] log = mclf.getLastLog().toArray(new String[0]);
+
+		assertArrayEquals(new String[] { "--STARTING--", "alrku", "hliuh",
+				"aerg\n", "8474u", "4jfnk", "f", "--ENDING--" }, log);
 
 		echo.shutdown();
 		s.shutdown();
