@@ -289,6 +289,7 @@ public class StartTest {
 
 		String[] log = mclf.getLastLog().toArray(new String[0]);
 
+		// buffer length is 5
 		assertArrayEquals(new String[] { "--STARTING--", "alrku", "hliuh",
 				"aerg\n", "8474u", "4jfnk", "f", "--ENDING--" }, log);
 
