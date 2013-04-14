@@ -69,7 +69,7 @@ public abstract class AbstractCommandLogger implements CommandLogger {
 		for (int i = off; i < start + len; i++) {
 			if (buffer.length == end + 2 - off) {
 				System.arraycopy(bytes, off, buffer, blen, end + 2 - off);
-				logBuffer(buffer, 0, buffer.length, bytes[i] == nl);
+				logBuffer(buffer, 0, buffer.length, bytes[i] != nl);
 				off = i + 1;
 				blen = 0;
 				logger.debug("BUFFER FULL");
@@ -86,7 +86,7 @@ public abstract class AbstractCommandLogger implements CommandLogger {
 						off = i + 1;
 						blen = 0;
 					} else {
-						logBuffer(new byte[] { nl }, 0, 1, true);
+						logBuffer(new byte[] { nl }, 0, 1, false);
 					}
 				}
 			}
@@ -101,14 +101,14 @@ public abstract class AbstractCommandLogger implements CommandLogger {
 
 	/**
 	 * Called when there is a complete buffer of data to log, or a newline is
-	 * found
+	 * found, or the end of the connection is reached and the buffer is flushed
 	 * 
 	 * @since 1.0
 	 * @param b
 	 * @param off
 	 * @param len
-	 * @param isEnd
-	 *            if this ends with a newline
+	 * @param isContinued
+	 *            if this log line is not complete and continues to the next one
 	 */
-	abstract protected void logBuffer(byte[] b, int off, int len, boolean isEnd);
+	abstract protected void logBuffer(byte[] b, int off, int len, boolean isContinued);
 }

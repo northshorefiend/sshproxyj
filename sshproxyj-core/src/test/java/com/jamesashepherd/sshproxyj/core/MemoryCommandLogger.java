@@ -32,7 +32,7 @@ public class MemoryCommandLogger extends AbstractCommandLogger {
 	}
 
 	@Override
-	protected void logBuffer(byte[] b, int off, int len, boolean isEnd) {
+	protected void logBuffer(byte[] b, int off, int len, boolean isContinued) {
 		try {
 			String s = new String(b, off, len, "UTF-8");
 			logger.debug("LOGGING {}", s);
