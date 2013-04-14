@@ -26,6 +26,11 @@
 			<artifactId>sshproxyj-start</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>sshproxyj-dao</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
