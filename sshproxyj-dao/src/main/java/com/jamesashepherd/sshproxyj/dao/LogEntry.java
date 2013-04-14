@@ -6,6 +6,7 @@
  */
 package com.jamesashepherd.sshproxyj.dao;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -24,6 +25,8 @@ import javax.persistence.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jamesashepherd.sshproxyj.core.ProxyCredentials;
+
 /**
  * 
  * 
@@ -38,15 +41,31 @@ public class LogEntry {
 	private Long id;
 	private Date timestamp;
 	private Long version;
-	private String user;
-	private String fqdn;
-	private int port;
 	private String username;
-	private byte[] bytes;
+	private String host;
+	private int port;
+	private String remoteUsername;
+	private byte[] bytes = null;
 	private YesNo continues;
 	private LogInOut logInOut;
 
 	public LogEntry() {
+	}
+
+	public LogEntry(ProxyCredentials pc, byte[] b, boolean continues) {
+		setTimestamp(new Date());
+		setUsername(pc.getUsername());
+		setRemoteHost(pc.getRemoteHost());
+		setRemotePort(pc.getRemotePort());
+		setRemoteUsername(pc.getRemoteUsername());
+		setBytes(b);
+		setContinues(continues ? YesNo.Y : YesNo.N);
+		setLogInOut(LogInOut.N);
+	}
+
+	public LogEntry(ProxyCredentials pc, LogInOut loginout) {
+		this(pc, null, false);
+		setLogInOut(loginout);
 	}
 
 	@Id
@@ -83,44 +102,7 @@ public class LogEntry {
 	/**
 	 * 
 	 * @since 1.0
-	 * @return The sshproxyj user
-	 */
-	@Column(name = "cUser", nullable = false)
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	/**
-	 * 
-	 * @since 1.0
-	 * @return host that is being proxied
-	 */
-	@Column(name = "cFQDN", nullable = false)
-	public String getFQDN() {
-		return fqdn;
-	}
-
-	public void setFQDN(String fqdn) {
-		this.fqdn = fqdn;
-	}
-
-	@Column(name = "nPort", nullable = false)
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	/**
-	 * 
-	 * @since 1.0
-	 * @return the username on the remote host
+	 * @return The sshproxyj username
 	 */
 	@Column(name = "cUsername", nullable = false)
 	public String getUsername() {
@@ -131,8 +113,45 @@ public class LogEntry {
 		this.username = username;
 	}
 
+	/**
+	 * 
+	 * @since 1.0
+	 * @return host that is being proxied
+	 */
+	@Column(name = "cHost", nullable = false)
+	public String getRemoteHost() {
+		return host;
+	}
+
+	public void setRemoteHost(String host) {
+		this.host = host;
+	}
+
+	@Column(name = "nPort", nullable = false)
+	public int getRemotePort() {
+		return port;
+	}
+
+	public void setRemotePort(int port) {
+		this.port = port;
+	}
+
+	/**
+	 * 
+	 * @since 1.0
+	 * @return the username on the remote host
+	 */
+	@Column(name = "cRemoteUsername", nullable = false)
+	public String getRemoteUsername() {
+		return remoteUsername;
+	}
+
+	public void setRemoteUsername(String remoteUsername) {
+		this.remoteUsername = remoteUsername;
+	}
+
 	@Lob
-	@Column(name = "bBytes", nullable = false)
+	@Column(name = "bBytes", nullable = true)
 	public byte[] getBytes() {
 		return bytes;
 	}
@@ -143,7 +162,7 @@ public class LogEntry {
 
 	@Column(name = "cContinues", nullable = false)
 	@Enumerated(EnumType.STRING)
-	public YesNo isContinues() {
+	public YesNo getContinues() {
 		return continues;
 	}
 
@@ -159,5 +178,22 @@ public class LogEntry {
 
 	public void setLogInOut(LogInOut logInOut) {
 		this.logInOut = logInOut;
+	}
+
+	@Override
+	public String toString() {
+		String out = getId() + ":" + getTimestamp() + " " + getRemoteUsername()
+				+ "@" + getRemoteHost() + ":" + getRemotePort() + "/"
+				+ getUsername() + " Continues:" + getContinues() + " LogInOut:"
+				+ getLogInOut();
+
+		if (getBytes() != null) {
+			try {
+				out += " {" + new String(getBytes(), "UTF-8") + "}";
+			} catch (UnsupportedEncodingException e) {
+				logger.error("Failed to create String", e);
+			}
+		}
+		return out;
 	}
 }
