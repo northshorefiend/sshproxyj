@@ -6,14 +6,19 @@
  */
 package com.jamesashepherd.sshproxyj.dao;
 
+import static org.junit.Assert.*;
+
 import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,19 +41,18 @@ public class LogTest {
 
 	@Before
 	public void setUp() throws Exception {
-		// A SessionFactory is set up once for an application
-		sessionFactory = new Configuration().configure() // configures settings
-															// from
-															// hibernate.cfg.xml
-				.buildSessionFactory();
+		Configuration configuration = new Configuration();
+		configuration.configure();
+		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
+				.applySettings(configuration.getProperties())
+				.buildServiceRegistry();
+		sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 	}
 
 	@Test
-	public void testBasicUsage() throws UnsupportedEncodingException {
-		// create a couple of events...
+	public void testBasicUsage() throws UnsupportedEncodingException, InterruptedException {
 		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-		
+
 		ProxyCredentials pc = new ProxyCredentials() {
 
 			@Override
@@ -81,23 +85,55 @@ public class LogTest {
 				return null;
 			}
 		};
-		
+
+		Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		Thread.sleep(1);
+		String[] testStrings = new String[] { "this is a command\n",
+				"let's do something else\n" };
+
+		session.beginTransaction();
+
 		session.save(new LogEntry(pc, LogInOut.I));
-		session.save(new LogEntry(pc, "this is a command\n".getBytes("UTF-8"), false));
-		session.save(new LogEntry(pc, "let's do something else\n".getBytes("UTF-8"), false));
+		for (String s : testStrings) {
+			session.save(new LogEntry(pc, s.getBytes("UTF-8"), false));
+		}
+		Thread.sleep(1);
 		session.save(new LogEntry(pc, LogInOut.O));
-		
+
+		Calendar end = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
 		session.getTransaction().commit();
 		session.close();
 
-		// now lets pull events from the database and list them
 		session = sessionFactory.openSession();
 		session.beginTransaction();
-		List result = session.createQuery("from LogEntry").list();
+		List result = session.createQuery("from LogEntry LE ORDER BY LE.id")
+				.list();
+		int i = 0;
 		for (LogEntry le : (List<LogEntry>) result) {
-			System.err.println(le);
+			System.out.println(le);
+			assertTrue(le.getTimestamp().after(start));
+			assertTrue(le.getTimestamp().before(end));
+			assertEquals("admin", le.getRemoteUsername());
+			assertEquals("testuser", le.getUsername());
+			assertEquals(22, le.getRemotePort());
+			assertEquals("myhost", le.getRemoteHost());
+			assertEquals(YesNo.N, le.getContinues());
+
+			if (i < 1) {
+				assertEquals(LogInOut.I, le.getLogInOut());
+				assertNull(le.getBytes());
+			} else if (i <= testStrings.length) {
+				assertEquals(LogInOut.N, le.getLogInOut());
+				assertEquals(testStrings[i-1], new String(le.getBytes(), "UTF-8"));
+			} else {
+				assertEquals(LogInOut.O, le.getLogInOut());
+				assertNull(le.getBytes());
+			}
+
+			i++;
 		}
-		
+
 		session.getTransaction().commit();
 		session.close();
 	}

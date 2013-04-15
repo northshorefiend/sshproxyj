@@ -204,7 +204,7 @@ public class StartTest {
 	// (timeout = 30000)
 	public void passThru() throws IOException, StartException, BeansException,
 			SshProxyJException, InterruptedException {
-		System.err.println("PassThru Started");
+		System.out.println("PassThru Started");
 		Properties p = new Properties();
 		p.load(getClass().getResourceAsStream("passthru.properties"));
 		Start s = new Start();
@@ -259,10 +259,10 @@ public class StartTest {
 					}
 				});
 
-		System.err.println("Starting Echo Server");
+		System.out.println("Starting Echo Server");
 		Properties p2 = new Properties();
 		Start echo = setupEchoServer(p2);
-		System.err.println("Echo Server Started");
+		System.out.println("Echo Server Started");
 
 		SshConnectionFactory scf = new SshConnectionFactory();
 		scf.startup();
@@ -284,7 +284,7 @@ public class StartTest {
 		shell.close();
 		scf.shutdown();
 
-		// extra nl? Dunno why
+		// extra nl added in CommandEcho
 		assertEquals(command + '\n', sb.toString());
 
 		String[] log = mclf.getLastLog().toArray(new String[0]);

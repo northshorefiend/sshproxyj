@@ -7,7 +7,8 @@
 package com.jamesashepherd.sshproxyj.dao;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,7 +40,7 @@ import com.jamesashepherd.sshproxyj.core.ProxyCredentials;
 public class LogEntry {
 	final Logger logger = LoggerFactory.getLogger(LogEntry.class);
 	private Long id;
-	private Date timestamp;
+	private Calendar timestamp;
 	private Long version;
 	private String username;
 	private String host;
@@ -53,7 +54,8 @@ public class LogEntry {
 	}
 
 	public LogEntry(ProxyCredentials pc, byte[] b, boolean continues) {
-		setTimestamp(new Date());
+		Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		setTimestamp(now);
 		setUsername(pc.getUsername());
 		setRemoteHost(pc.getRemoteHost());
 		setRemotePort(pc.getRemotePort());
@@ -91,11 +93,11 @@ public class LogEntry {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "dtTimestamp", nullable = false)
-	public Date getTimestamp() {
+	public Calendar getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(Calendar timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -182,10 +184,16 @@ public class LogEntry {
 
 	@Override
 	public String toString() {
-		String out = getId() + ":" + getTimestamp() + " " + getRemoteUsername()
-				+ "@" + getRemoteHost() + ":" + getRemotePort() + "/"
-				+ getUsername() + " Continues:" + getContinues() + " LogInOut:"
-				+ getLogInOut();
+		String out = getId() + ":" + getTimestamp().get(Calendar.YEAR) + "-"
+				+ (getTimestamp().get(Calendar.MONTH) + 1) + "-"
+				+ getTimestamp().get(Calendar.DAY_OF_MONTH) + " "
+				+ getTimestamp().get(Calendar.HOUR_OF_DAY) + ":"
+				+ getTimestamp().get(Calendar.MINUTE) + ":"
+				+ getTimestamp().get(Calendar.SECOND) + "."
+				+ getTimestamp().get(Calendar.MILLISECOND) + " "
+				+ getRemoteUsername() + "@" + getRemoteHost() + ":"
+				+ getRemotePort() + "/" + getUsername() + " Continues:"
+				+ getContinues() + " LogInOut:" + getLogInOut();
 
 		if (getBytes() != null) {
 			try {
