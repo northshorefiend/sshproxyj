@@ -97,7 +97,7 @@ public class LogTest {
 		for (String s : testStrings) {
 			session.save(new LogEntry(pc, s.getBytes("UTF-8"), false));
 		}
-		Thread.sleep(1);
+		Thread.sleep(1000);
 		session.save(new LogEntry(pc, LogInOut.O));
 
 		Calendar end = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

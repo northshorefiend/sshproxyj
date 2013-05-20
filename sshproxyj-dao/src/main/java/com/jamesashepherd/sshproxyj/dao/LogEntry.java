@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.jamesashepherd.sshproxyj.core.ProxyCredentials;
 
 /**
- * 
+ * A log entry, logging part of the stdin of a connection
  * 
  * 
  * @author James A. Shepherd
